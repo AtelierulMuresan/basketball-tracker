@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d1117" id="theme-meta" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BaskTracker" />
+  <title>🏀 Basketball Tracker — Romania</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEMES ── */
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15);
+      --text: #e6edf3; --text-secondary: #8b949e; --text-muted: #484f58;
+      --nba-blue: #1d428a; --nba-gold: #c8a44a;
+      --fiba-green: #0a5c36; --live-red: #d03030;
+      --accent: #2563eb; --accent-bg: rgba(37,99,235,0.12); --accent-text: #60a5fa;
+      --win-green: #4ade80; --radius: 8px; --card-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    body.light {
+      --bg: #f3f4f6; --surface: #ffffff; --surface2: #f9fafb;
+      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.15);
+      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --accent-bg: rgba(37,99,235,0.07); --accent-text: #1d4ed8;
+      --win-green: #16a34a; --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; font-size: 15px; line-height: 1.5;
+      transition: background 0.2s, color 0.2s;
+    }
+    .app { max-width: 720px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+
+    /* ── HEADER ── */
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:10px; }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .logo { width:42px; height:42px; border-radius:50%; background:var(--nba-blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .logo i { color:var(--nba-gold); font-size:22px; }
+    .app-title { font-size:17px; font-weight:600; }
+    .app-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .header-right { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .tz-badge { font-size:13px; background:var(--accent-bg); color:var(--accent-text); border-radius:var(--radius); padding:5px 10px; border:1px solid rgba(37,99,235,0.3); display:flex; align-items:center; gap:5px; }
+    .icon-btn { font-size:13px; color:var(--text-secondary); border:1px solid var(--border-strong); border-radius:var(--radius); padding:6px 10px; background:var(--surface); cursor:pointer; display:flex; align-items:center; gap:5px; transition:color .15s,border-color .15s; font-family:inherit; }
+    .icon-btn:hover { color:var(--text); border-color:var(--accent); }
+    .icon-btn.active { color:var(--accent-text); border-color:var(--accent); background:var(--accent-bg); }
+
+    /* ── TABS ── */
+    .tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:1.25rem; overflow-x:auto; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { padding:8px 14px; font-size:13px; cursor:pointer; border:none; background:none; color:var(--text-secondary); font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; transition:color .15s; }
+    .tab.active { color:var(--text); border-bottom-color:var(--accent); font-weight:500; }
+    .tab:hover:not(.active) { color:var(--text); }
+
+    /* ── FILTERS ── */
+    .filters { display:flex; gap:6px; margin-bottom:1rem; flex-wrap:wrap; }
+    .filter-btn { font-size:12px; padding:4px 12px; border-radius:20px; border:1px solid var(--border-strong); background:none; color:var(--text-secondary); cursor:pointer; font-family:inherit; transition:all .12s; }
+    .filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .filter-btn:hover:not(.active) { color:var(--text); }
+
+    /* ── DAY LABEL ── */
+    .day-label { font-size:11px; color:var(--text-muted); font-weight:600; margin:1.25rem 0 8px; text-transform:uppercase; letter-spacing:.07em; }
+
+    /* ── GAME CARD ── */
+    .games-list { display:flex; flex-direction:column; gap:6px; }
+    .game-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:12px 14px; display:flex; align-items:flex-start; gap:12px; transition:border-color .15s; }
+    .game-card:hover { border-color:var(--border-strong); }
+    .game-card.live { border-left:3px solid var(--live-red); }
+    .league-badge { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; letter-spacing:.02em; margin-top:2px; }
+    .league-badge.nba { background:var(--nba-blue); color:var(--nba-gold); }
+    .league-badge.fiba { background:var(--fiba-green); color:#fff; }
+    .league-badge.ubt { background:#1a1a1a; color:#fff; border:1px solid #444; }
+    .league-badge.ro { background:#002B7F; color:#FCD116; }
+    .game-teams { flex:1; min-width:0; }
+    .matchup { font-size:14px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .game-right { text-align:right; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+    .time-ro { font-size:15px; font-weight:500; }
+    .live-dot { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--live-red); font-weight:500; }
+    .dot { width:7px; height:7px; background:var(--live-red); border-radius:50%; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── TV + REMINDER TAGS ── */
+    .tag-row { display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; align-items:center; }
+    .tv-tag { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+    .tv-tag.antenaplay { background:#6b21a8; color:#e9d5ff; }
+    .tv-tag.tvr        { background:#0a5c36; color:#bbf7d0; }
+    .tv-tag.abaliga    { background:#b45309; color:#fde68a; }
+    .tv-tag.eurocup    { background:#1d428a; color:#bfdbfe; }
+    .tv-tag.digi       { background:#374151; color:#d1d5db; }
+    .reminder-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid var(--border-strong); background:none; color:var(--text-secondary); cursor:pointer; font-family:inherit; transition:all .12s; white-space:nowrap; }
+    .reminder-btn.set { background:rgba(234,179,8,.15); color:#ca8a04; border-color:#ca8a04; }
+    .reminder-btn:hover:not(.set) { border-color:var(--accent); color:var(--accent-text); }
+
+    /* ── COUNTDOWN ── */
+    .countdown { font-size:11px; color:var(--accent-text); margin-top:2px; }
+
+    /* ── SPOILER TOGGLE ── */
+    .spoiler-wrap { position:relative; display:inline-block; }
+    .spoiler-hidden .score-val { filter:blur(5px); user-select:none; }
+    .spoiler-btn { font-size:10px; color:var(--text-muted); cursor:pointer; background:none; border:none; font-family:inherit; padding:0; display:block; margin-top:1px; }
+
+    /* ── SCORES VIEW ── */
+    .scores-view { display:flex; flex-direction:column; gap:8px; }
+    .score-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:14px 16px; }
+    .score-row { display:flex; align-items:center; justify-content:space-between; }
+    .team-name { font-size:14px; color:var(--text); font-weight:500; }
+    .pts { font-size:18px; font-weight:600; color:var(--text); min-width:36px; text-align:right; }
+    .pts.leading { color:var(--accent-text); }
+    .divider-score { height:1px; background:var(--border); margin:10px 0; }
+    .win-tag { font-size:11px; color:var(--win-green); margin-left:5px; }
+
+    /* ── STANDINGS ── */
+    .standings-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead tr { border-bottom:1px solid var(--border); }
+    th { padding:7px 10px; color:var(--text-muted); font-weight:500; text-align:center; }
+    th:first-child, th:nth-child(2) { text-align:left; }
+    td { padding:9px 10px; border-bottom:1px solid var(--border); color:var(--text-secondary); text-align:center; }
+    td:first-child { color:var(--text-muted); }
+    td:nth-child(2) { text-align:left; color:var(--text); }
+    tr:last-child td { border-bottom:none; }
+    .clinched-tag { font-size:11px; color:var(--accent-text); }
+    .playoff-row td:nth-child(2) { font-weight:500; }
+
+    /* ── BRACKET ── */
+    .bracket-wrap { overflow-x:auto; padding-bottom:8px; }
+    .bracket { display:flex; gap:0; min-width:560px; }
+    .bracket-col { display:flex; flex-direction:column; flex:1; }
+    .bracket-col-label { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; text-align:center; margin-bottom:10px; padding:0 4px; }
+    .bracket-matchup { background:var(--surface); border:1px solid var(--border); border-radius:8px; margin:4px; padding:8px 10px; }
+    .bracket-matchup.active { border-color:var(--accent); }
+    .bracket-team { display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:12px; }
+    .bracket-team .seed { color:var(--text-muted); margin-right:6px; font-size:11px; }
+    .bracket-team .bteam { flex:1; color:var(--text-secondary); }
+    .bracket-team.winner .bteam { color:var(--text); font-weight:600; }
+    .bracket-team .bscore { font-size:12px; color:var(--text-secondary); }
+    .bracket-team.winner .bscore { color:var(--text); font-weight:600; }
+    .bracket-connector { display:flex; flex-direction:column; justify-content:center; }
+    .connector-spacer { flex:1; }
+    .bracket-series { font-size:10px; color:var(--accent-text); text-align:center; margin-top:3px; }
+    .bracket-spacer { flex:1; min-height:20px; }
+
+    /* ── SPOTLIGHT ── */
+    .spotlight-card { background:linear-gradient(135deg, #1d428a 0%, #0d1117 100%); border:1px solid rgba(37,99,235,0.3); border-radius:var(--card-radius); padding:16px; margin-bottom:1rem; position:relative; overflow:hidden; }
+    body.light .spotlight-card { background:linear-gradient(135deg, #dbeafe 0%, #f3f4f6 100%); border-color:rgba(37,99,235,0.2); }
+    .spotlight-label { font-size:10px; color:rgba(255,255,255,0.5); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
+    body.light .spotlight-label { color:var(--text-muted); }
+    .spotlight-name { font-size:20px; font-weight:700; color:#fff; }
+    body.light .spotlight-name { color:var(--text); }
+    .spotlight-team { font-size:13px; color:rgba(255,255,255,0.6); margin-top:2px; margin-bottom:12px; }
+    body.light .spotlight-team { color:var(--text-secondary); }
+    .spotlight-stats { display:flex; gap:20px; flex-wrap:wrap; }
+    .stat-block { text-align:center; }
+    .stat-val { font-size:22px; font-weight:700; color:var(--nba-gold); }
+    .stat-lbl { font-size:10px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.06em; }
+    body.light .stat-lbl { color:var(--text-muted); }
+    .spotlight-nav { display:flex; gap:6px; margin-top:12px; }
+    .spotlight-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .15s; }
+    body.light .spotlight-dot { background:var(--border-strong); }
+    .spotlight-dot.active { background:var(--nba-gold); }
+
+    /* ── ROSTER ── */
+    .roster-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:8px; }
+    .player-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .player-num { font-size:11px; color:var(--text-muted); }
+    .player-name { font-size:13px; font-weight:500; color:var(--text); margin-top:2px; }
+    .player-pos { font-size:11px; color:var(--text-secondary); }
+    .player-flag { font-size:14px; }
+
+    /* ── INFO BOX ── */
+    .info-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; font-size:12px; color:var(--text-secondary); margin-top:1rem; }
+    .info-box a { color:var(--accent-text); text-decoration:none; }
+
+    /* ── EMPTY ── */
+    .empty { text-align:center; padding:3rem 1rem; color:var(--text-secondary); }
+    .empty i { font-size:36px; color:var(--text-muted); margin-bottom:12px; display:block; }
+    .section-empty { padding:2rem; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+    /* ── TOAST ── */
+    #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:#1e293b; color:#f1f5f9; font-size:13px; padding:10px 18px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); box-shadow:var(--shadow); transition:transform .25s; z-index:999; white-space:nowrap; pointer-events:none; }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+    body.light #toast { background:#1e293b; }
+
+    .last-updated { font-size:12px; color:var(--text-muted); text-align:center; margin-top:2rem; }
+
+    @media (max-width:480px) {
+      .app { padding:1rem .75rem 4rem; }
+      .matchup { font-size:13px; }
+      .tab { padding:7px 10px; font-size:12px; }
+      .spotlight-stats { gap:14px; }
+      .stat-val { font-size:18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo"><i class="ti ti-ball-basketball"></i></div>
+      <div>
+        <div class="app-title">Basketball Tracker</div>
+        <div class="app-sub">NBA · FIBA · U-BT Cluj · Romania time</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="tz-badge"><i class="ti ti-clock" style="font-size:13px;"></i><span id="ro-clock">--:--</span> EET</div>
+      <button class="icon-btn" id="spoiler-toggle-btn" onclick="toggleSpoilers()" title="Toggle score spoilers">
+        <i class="ti ti-eye" id="spoiler-icon"></i>
+      </button>
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">
+        <i class="ti ti-sun" id="theme-icon"></i>
+      </button>
+      <button class="icon-btn" onclick="loadData()"><i class="ti ti-refresh"></i></button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('schedule',this)">Schedule</button>
+    <button class="tab" onclick="switchTab('scores',this)">Live & Scores</button>
+    <button class="tab" onclick="switchTab('bracket',this)">Bracket</button>
+    <button class="tab" onclick="switchTab('standings',this)">Standings</button>
+    <button class="tab" onclick="switchTab('ubt',this)">U-BT Cluj</button>
+    <button class="tab" onclick="switchTab('romania',this)">🇷🇴 Romania</button>
+    <button class="tab" onclick="switchTab('stars',this)">Stars</button>
+  </div>
+
+  <!-- SCHEDULE TAB -->
+  <div id="tab-schedule">
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterLeague('all',this)">All</button>
+      <button class="filter-btn" onclick="filterLeague('NBA',this)">NBA</button>
+      <button class="filter-btn" onclick="filterLeague('FIBA',this)">FIBA</button>
+    </div>
+    <div id="schedule-list" class="games-list"><div class="section-empty">Loading…</div></div>
+  </div>
+
+  <!-- SCORES TAB -->
+  <div id="tab-scores" style="display:none;">
+    <div id="scores-list" class="scores-view"><div class="section-empty">Loading…</div></div>
+  </div>
+
+  <!-- BRACKET TAB -->
+  <div id="tab-bracket" style="display:none;">
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem;">2026 NBA Playoffs — Conference Semifinals</div>
+    <div style="margin-bottom:1.25rem;">
+      <div class="day-label">Western Conference</div>
+      <div class="bracket-wrap"><div id="bracket-west" class="bracket"></div></div>
+    </div>
+    <div>
+      <div class="day-label">Eastern Conference</div>
+      <div class="bracket-wrap"><div id="bracket-east" class="bracket"></div></div>
+    </div>
+  </div>
+
+  <!-- STANDINGS TAB -->
+  <div id="tab-standings" style="display:none;">
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterConf('East',this)">Eastern</button>
+      <button class="filter-btn" onclick="filterConf('West',this)">Western</button>
+    </div>
+    <div id="standings-table" class="standings-wrap"></div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);padding:0 4px;">Ranks 1–8 = Playoff · 9–10 = Play-In</div>
+  </div>
+
+  <!-- U-BT TAB -->
+  <div id="tab-ubt" style="display:none;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+      <div class="league-badge ubt" style="width:44px;height:44px;font-size:10px;">U-BT</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:600;">U-BT Cluj-Napoca</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">CS U-Mobitelco · BTarena · 10,000 seats</div>
+        <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
+          <span class="tv-tag eurocup"><i class="ti ti-trophy" style="font-size:10px;"></i>EuroCup</span>
+          <span class="tv-tag abaliga"><i class="ti ti-trophy" style="font-size:10px;"></i>Liga ABA</span>
+          <span class="tv-tag digi"><i class="ti ti-trophy" style="font-size:10px;"></i>LNBM</span>
+        </div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:var(--text-secondary);">
+        <div style="font-size:18px;font-weight:700;color:var(--nba-gold);">7×</div>
+        <div>Liga Nat. titles</div>
+      </div>
+    </div>
+    <div id="ubt-games-list" class="games-list"></div>
+    <div class="day-label" style="margin-top:1.25rem;">2025-26 Roster</div>
+    <div id="ubt-roster" class="roster-grid" style="margin-top:8px;"></div>
+    <div class="info-box">
+      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
+      Season runs <strong>October – May</strong>. New fixtures published September 2026.
+      Live scores: <a href="https://www.aba-liga.com/team/100/25/1/0/u-bt-cluj-napoca/" target="_blank">ABA Liga</a> ·
+      <a href="https://www.sofascore.com/basketball/team/u-banca-transilvania-cluj-napoca/59003" target="_blank">Sofascore</a>
+    </div>
+  </div>
+
+  <!-- ROMANIA TAB -->
+  <div id="tab-romania" style="display:none;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+      <div class="league-badge ro" style="width:44px;height:44px;font-size:18px;">🇷🇴</div>
+      <div>
+        <div style="font-size:15px;font-weight:600;">Romania Men's National Team</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">FIBA EuroBasket 2027 Qualifiers</div>
+        <span class="tv-tag tvr" style="margin-top:6px;display:inline-flex;"><i class="ti ti-device-tv" style="font-size:10px;"></i>TVR Sport (free)</span>
+      </div>
+    </div>
+    <div id="romania-games" class="games-list"></div>
+    <div class="info-box">
+      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
+      Romania's national team competes in <strong>FIBA EuroBasket 2027 Qualifiers</strong>. Games involving the Romanian national team are broadcast free on <strong>TVR Sport</strong> per the EBU-FIBA broadcast agreement. Follow at <a href="https://www.fiba.basketball/eurobasket/2027/qualifiers" target="_blank">FIBA.basketball</a>.
+    </div>
+  </div>
+
+  <!-- STARS TAB -->
+  <div id="tab-stars" style="display:none;">
+    <div id="spotlight-card" class="spotlight-card"></div>
+    <div id="stars-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:4px;"></div>
+  </div>
+
+  <div class="last-updated" id="last-updated"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── TIMEZONE ──────────────────────────────────────────────────────────────
+const RO_TZ = 'Europe/Bucharest';
+function toRO(d) { return new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',hour12:false}); }
+function toRODate(d) { return new Date(d).toLocaleDateString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short'}); }
+function toROFull(d) { return new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}); }
+function clockTick() {
+  document.getElementById('ro-clock').textContent =
+    new Date().toLocaleTimeString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',hour12:false});
+}
+setInterval(clockTick,1000); clockTick();
+
+// live countdown
+function countdown(isoTime) {
+  const diff = new Date(isoTime) - Date.now();
+  if (diff <= 0) return null;
+  const h = Math.floor(diff/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  if (h > 48) { const d=Math.floor(h/24); return `in ${d}d`; }
+  if (h > 0) return `in ${h}h ${m}m`;
+  return `in ${m}m`;
+}
+function updateCountdowns() {
+  document.querySelectorAll('[data-countdown]').forEach(el => {
+    const cd = countdown(el.dataset.countdown);
+    el.textContent = cd || '';
+  });
+}
+setInterval(updateCountdowns, 30000);
+
+// page title live indicator
+function updateTitle() {
+  const live = GAMES.filter(g=>g.status==='live');
+  document.title = live.length ? `🔴 LIVE — Basketball Tracker` : '🏀 Basketball Tracker — Romania';
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────
+let isDark = localStorage.getItem('bkt-theme') !== 'light';
+function applyTheme() {
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('theme-icon').className = isDark ? 'ti ti-sun' : 'ti ti-moon';
+  document.getElementById('theme-meta').content = isDark ? '#0d1117' : '#f3f4f6';
+}
+function toggleTheme() { isDark=!isDark; localStorage.setItem('bkt-theme', isDark?'dark':'light'); applyTheme(); }
+applyTheme();
+
+// ── SPOILERS ──────────────────────────────────────────────────────────────
+let spoilersHidden = localStorage.getItem('bkt-spoilers') === 'true';
+function applySpoilers() {
+  document.querySelectorAll('.spoiler-wrap').forEach(w => w.classList.toggle('spoiler-hidden', spoilersHidden));
+  document.getElementById('spoiler-icon').className = spoilersHidden ? 'ti ti-eye-off' : 'ti ti-eye';
+  document.getElementById('spoiler-toggle-btn').classList.toggle('active', spoilersHidden);
+}
+function toggleSpoilers() { spoilersHidden=!spoilersHidden; localStorage.setItem('bkt-spoilers', spoilersHidden); renderSchedule(); renderScores(); renderUBT(); applySpoilers(); }
+
+// ── REMINDERS ─────────────────────────────────────────────────────────────
+let reminders = JSON.parse(localStorage.getItem('bkt-reminders') || '{}');
+function saveReminders() { localStorage.setItem('bkt-reminders', JSON.stringify(reminders)); }
+
+async function toggleReminder(gameId, gameTime, label) {
+  if (reminders[gameId]) {
+    delete reminders[gameId];
+    saveReminders();
+    toast('Reminder removed');
+    renderSchedule(); renderUBT(); renderRomania();
+    return;
+  }
+  if (!('Notification' in window)) { toast('Notifications not supported in this browser'); return; }
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  if (perm !== 'granted') { toast('Please allow notifications in browser settings'); return; }
+  reminders[gameId] = { time: gameTime, label };
+  saveReminders();
+  toast('⏰ Reminder set for ' + toRO(gameTime) + ' RO time');
+  renderSchedule(); renderUBT(); renderRomania();
+  scheduleReminder(gameId, gameTime, label);
+}
+
+function scheduleReminder(gameId, gameTime, label) {
+  const msUntil = new Date(gameTime) - Date.now() - 30*60*1000; // 30min before
+  if (msUntil < 0) return;
+  setTimeout(() => {
+    if (!reminders[gameId]) return;
+    new Notification('🏀 Game starting in 30 min!', {
+      body: label + ' · ' + toRO(gameTime) + ' RO time',
+      icon: 'https://cdn.jsdelivr.net/npm/@tabler/icons/icons/ball-basketball.svg'
+    });
+  }, msUntil);
+}
+
+// fire any stored reminders on page load
+function initReminders() {
+  Object.entries(reminders).forEach(([id,r]) => scheduleReminder(id, r.time, r.label));
+}
+
+// register service worker for background notifications
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const swCode = `
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SCHEDULE_NOTIF') {
+    const { delay, title, body } = e.data;
+    setTimeout(() => {
+      self.registration.showNotification(title, { body, icon: '/icon-192.png', badge: '/icon-192.png' });
+    }, delay);
+  }
+});
+`;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
+// ── DATA ──────────────────────────────────────────────────────────────────
+const GAMES = [
+  { id:'nba-1', league:'NBA', home:'Oklahoma City Thunder', away:'San Antonio Spurs', time:'2026-08-17T20:00:00-05:00', venue:'Paycom Center', round:'Playoffs R2 G4', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
+  { id:'nba-2', league:'NBA', home:'Boston Celtics', away:'New York Knicks', time:'2026-08-17T22:30:00-05:00', venue:'TD Garden', round:'Playoffs R2 G5', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
+  { id:'nba-3', league:'NBA', home:'Denver Nuggets', away:'Los Angeles Lakers', time:'2026-08-18T19:00:00-06:00', venue:'Ball Arena', round:'Playoffs R2 G4', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
+  { id:'fiba-1', league:'FIBA', home:'Spain', away:'France', time:'2026-08-17T14:00:00+02:00', venue:'Palau Sant Jordi, Barcelona', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+  { id:'fiba-2', league:'FIBA', home:'Serbia', away:'Greece', time:'2026-08-17T17:00:00+02:00', venue:'Stark Arena, Belgrade', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+  { id:'fiba-3', league:'FIBA', home:'Slovenia', away:'Lithuania', time:'2026-08-18T20:30:00+02:00', venue:'Stožice Arena, Ljubljana', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+  { id:'nba-live-1', league:'NBA', home:'Detroit Pistons', away:'Cleveland Cavaliers', time:'2026-08-16T19:00:00-05:00', venue:'Little Caesars Arena', round:'Playoffs R2 G3', status:'live', homeScore:67, awayScore:71, quarter:'Q3 8:24', tv:'AntenaPLAY', tvClass:'antenaplay' },
+  { id:'fiba-f1', league:'FIBA', home:'Germany', away:'Turkey', time:'2026-08-16T17:00:00+02:00', venue:'SAP Arena, Mannheim', round:'EuroBasket 2026 QF', status:'final', homeScore:89, awayScore:76, tv:'TVR Sport', tvClass:'tvr' },
+  { id:'nba-f1', league:'NBA', home:'Houston Rockets', away:'Minnesota Timberwolves', time:'2026-08-15T20:00:00-05:00', venue:'Toyota Center', round:'Playoffs R2 G2', status:'final', homeScore:104, awayScore:98, tv:'AntenaPLAY', tvClass:'antenaplay' },
+  { id:'fiba-f2', league:'FIBA', home:'France', away:'Latvia', time:'2026-08-15T19:00:00+02:00', venue:'Accor Arena, Paris', round:'EuroBasket 2026 Group', status:'final', homeScore:81, awayScore:70, tv:'TVR Sport', tvClass:'tvr' },
+];
+
+const UBT_GAMES = [
+  { id:'ubt-1', home:'U-BT Cluj-Napoca', away:'KK Borac Cacak', time:'2026-02-02T18:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'Liga ABA', status:'final', homeScore:97, awayScore:76, tv:'ABA Liga TV', tvClass:'abaliga' },
+  { id:'ubt-2', home:'Neptunas Klaipeda', away:'U-BT Cluj-Napoca', time:'2025-12-12T19:00:00+02:00', venue:'Klaipeda', round:'EuroCup', status:'final', homeScore:97, awayScore:118, tv:'Eurosport', tvClass:'eurocup' },
+  { id:'ubt-3', home:'U-BT Cluj-Napoca', away:'WKS Slask Wroclaw', time:'2025-12-12T19:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'EuroCup', status:'final', homeScore:94, awayScore:92, tv:'Eurosport', tvClass:'eurocup' },
+  { id:'ubt-4', home:'CSM Oradea', away:'U-BT Cluj-Napoca', time:'2026-05-10T18:00:00+02:00', venue:'Oradea', round:'LNBM Final', status:'final', homeScore:72, awayScore:74, tv:'Digi Sport', tvClass:'digi' },
+  { id:'ubt-up1', home:'U-BT Cluj-Napoca', away:'TBD', time:'2026-10-10T19:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'EuroCup 2026-27 R1', status:'upcoming', tv:'Eurosport', tvClass:'eurocup' },
+  { id:'ubt-up2', home:'TBD', away:'U-BT Cluj-Napoca', time:'2026-10-17T19:00:00+02:00', venue:'TBD', round:'Liga ABA 2026-27 R1', status:'upcoming', tv:'ABA Liga TV', tvClass:'abaliga' },
+];
+
+const ROMANIA_GAMES = [
+  { id:'ro-1', home:'Romania', away:'Bulgaria', time:'2026-11-20T19:00:00+02:00', venue:'Sala Polivalentă, Cluj-Napoca', round:'EuroBasket 2027 Qual. W1', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+  { id:'ro-2', home:'Greece', away:'Romania', time:'2026-11-24T20:00:00+02:00', venue:'Athens', round:'EuroBasket 2027 Qual. W2', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+  { id:'ro-3', home:'Romania', away:'North Macedonia', time:'2027-02-19T19:00:00+02:00', venue:'Sala Polivalentă, Bucharest', round:'EuroBasket 2027 Qual. W3', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+];
+
+const UBT_ROSTER = [
+  { num:0,  name:'Daron Russell',    pos:'PG', flag:'🇺🇸' },
+  { num:3,  name:'Nighael Ceaser',   pos:'SF', flag:'🇺🇸' },
+  { num:5,  name:'Dušan Miletić',    pos:'PF', flag:'🇷🇸' },
+  { num:7,  name:'Mitchell Creek',   pos:'SF', flag:'🇦🇺' },
+  { num:10, name:'Karel Guzmán',     pos:'PG', flag:'🇨🇺' },
+  { num:14, name:'Luka Božić',       pos:'SG', flag:'🇷🇸' },
+  { num:21, name:'Augustas Marčiulionis', pos:'SG', flag:'🇱🇹' },
+  { num:33, name:'Bogdan Radosavljević', pos:'C', flag:'🇷🇸' },
+  { num:44, name:'Vlad Moldoveanu',  pos:'F',  flag:'🇷🇴' },
+];
+
+const STARS = [
+  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'Led OKC to best record in the West; MVP frontrunner' },
+  { name:'Victor Wembanyama', team:'San Antonio Spurs', pos:'C', stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" unicorn — blocks, shoots 3s, handles the ball. Unprecedented' },
+  { name:'Nikola Jokić', team:'Denver Nuggets', pos:'C', stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP. Best passing big man of all time. Watch every possession' },
+  { name:'LeBron James', team:'Los Angeles Lakers', pos:'F', stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Greatest of all time debate in real time' },
+  { name:'Jayson Tatum', team:'Boston Celtics', pos:'F', stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer, elite clutch player' },
+  { name:'Stephen Curry', team:'Golden State Warriors', pos:'G', stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Changed how basketball is played. Greatest shooter ever' },
+];
+
+const BRACKET = {
+  West: {
+    label:'West Semis',
+    series:[
+      { top:{seed:1,name:'OKC Thunder',wins:3}, bot:{seed:5,name:'Houston Rockets',wins:1}, leader:'OKC', active:true },
+      { top:{seed:2,name:'San Antonio Spurs',wins:2}, bot:{seed:3,name:'Denver Nuggets',wins:2}, leader:null, active:true },
+    ]
+  },
+  East: {
+    label:'East Semis',
+    series:[
+      { top:{seed:1,name:'Detroit Pistons',wins:2}, bot:{seed:4,name:'Cleveland Cavaliers',wins:2}, leader:null, active:true },
+      { top:{seed:2,name:'Boston Celtics',wins:3}, bot:{seed:3,name:'New York Knicks',wins:2}, leader:'BOS', active:true },
+    ]
+  }
+};
+
+const STANDINGS = {
+  East:[
+    {rank:1,team:'Detroit Pistons',w:60,l:22,pct:.732,tag:'Conf Finals'},
+    {rank:2,team:'Boston Celtics',w:56,l:26,pct:.683,tag:'Playoff'},
+    {rank:3,team:'New York Knicks',w:53,l:29,pct:.646,tag:'Playoff'},
+    {rank:4,team:'Cleveland Cavaliers',w:52,l:30,pct:.634,tag:'Playoff'},
+    {rank:5,team:'Toronto Raptors',w:46,l:36,pct:.561,tag:'Playoff'},
+    {rank:6,team:'Atlanta Hawks',w:46,l:36,pct:.561,tag:'Playoff'},
+    {rank:7,team:'Philadelphia 76ers',w:45,l:37,pct:.549,tag:'Playoff'},
+    {rank:8,team:'Orlando Magic',w:45,l:37,pct:.549,tag:'Playoff'},
+    {rank:9,team:'Charlotte Hornets',w:44,l:38,pct:.537,tag:'Play-In'},
+    {rank:10,team:'Miami Heat',w:43,l:39,pct:.524,tag:'Play-In'},
+    {rank:11,team:'Milwaukee Bucks',w:32,l:50,pct:.390,tag:''},
+    {rank:12,team:'Chicago Bulls',w:31,l:51,pct:.378,tag:''},
+    {rank:13,team:'Brooklyn Nets',w:20,l:62,pct:.244,tag:''},
+    {rank:14,team:'Indiana Pacers',w:19,l:63,pct:.232,tag:''},
+    {rank:15,team:'Washington Wizards',w:17,l:65,pct:.207,tag:''},
+  ],
+  West:[
+    {rank:1,team:'Oklahoma City Thunder',w:64,l:18,pct:.780,tag:'Conf Finals'},
+    {rank:2,team:'San Antonio Spurs',w:62,l:20,pct:.756,tag:'Playoff'},
+    {rank:3,team:'Denver Nuggets',w:54,l:28,pct:.659,tag:'Playoff'},
+    {rank:4,team:'Los Angeles Lakers',w:53,l:29,pct:.646,tag:'Playoff'},
+    {rank:5,team:'Houston Rockets',w:52,l:30,pct:.634,tag:'Playoff'},
+    {rank:6,team:'Minnesota Timberwolves',w:49,l:33,pct:.598,tag:'Playoff'},
+    {rank:7,team:'Portland Trail Blazers',w:42,l:40,pct:.512,tag:'Playoff'},
+    {rank:8,team:'Phoenix Suns',w:45,l:37,pct:.549,tag:'Playoff'},
+    {rank:9,team:'LA Clippers',w:42,l:40,pct:.512,tag:'Play-In'},
+    {rank:10,team:'Golden State Warriors',w:37,l:45,pct:.451,tag:'Play-In'},
+    {rank:11,team:'New Orleans Pelicans',w:26,l:56,pct:.317,tag:''},
+    {rank:12,team:'Dallas Mavericks',w:26,l:56,pct:.317,tag:''},
+    {rank:13,team:'Memphis Grizzlies',w:25,l:57,pct:.305,tag:''},
+    {rank:14,team:'Sacramento Kings',w:22,l:60,pct:.268,tag:''},
+    {rank:15,team:'Utah Jazz',w:22,l:60,pct:.268,tag:''},
+  ]
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let currentLeague = 'all';
+let currentConf   = 'East';
+let spotlightIdx  = 0;
+
+// ── RENDER HELPERS ────────────────────────────────────────────────────────
+function gameCard(g, badge, showReminder=true) {
+  const isUpcoming = g.status === 'upcoming';
+  const cd = isUpcoming ? countdown(g.time) : null;
+  const rSet = reminders[g.id];
+  const spoilerClass = (g.status==='final') ? 'spoiler-wrap' : '';
+  const scoreHtml = g.homeScore !== undefined
+    ? `<div class="${spoilerClass}"><span class="score-val">${g.awayScore}–${g.homeScore}</span></div>`
+    : '';
+  return `
+  <div class="game-card${g.status==='live'?' live':''}">
+    ${badge}
+    <div class="game-teams">
+      <div class="matchup">${g.away === 'TBD' ? g.home+' vs TBD' : g.away+' @ '+g.home}</div>
+      <div class="meta">${g.round}${g.venue && isUpcoming ? ' · '+g.venue : ''}</div>
+      <div class="tag-row">
+        ${g.tv ? `<span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px;"></i>${g.tv}</span>` : ''}
+        ${showReminder && isUpcoming ? `<button class="reminder-btn${rSet?' set':''}" onclick="toggleReminder('${g.id}','${g.time}','${(g.away+' @ '+g.home).replace(/'/g,"\\'")}')"><i class="ti ti-bell" style="font-size:11px;"></i>${rSet?'Reminder set':'Remind me'}</button>` : ''}
+      </div>
+    </div>
+    <div class="game-right">
+      ${g.status==='live' ? `<span class="live-dot"><span class="dot"></span>${g.quarter}</span>` : ''}
+      ${isUpcoming ? `<div class="time-ro">${toRO(g.time)}</div><div class="meta">${toRODate(g.time)}</div>` : ''}
+      ${g.status==='live' ? `<div class="meta">${g.awayScore}–${g.homeScore}</div>` : ''}
+      ${g.status==='final' ? scoreHtml+'<div class="meta">Final · '+toRODate(g.time)+'</div>' : ''}
+      ${cd ? `<div class="countdown" data-countdown="${g.time}">${cd}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────
+function renderSchedule() {
+  const filtered = GAMES.filter(g => currentLeague==='all' || g.league===currentLeague);
+  const live     = filtered.filter(g=>g.status==='live');
+  const upcoming = filtered.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished = filtered.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html = '';
+  const badge = g => `<div class="league-badge ${g.league.toLowerCase()}">${g.league}</div>`;
+  if (live.length)     { html += '<div class="day-label">Live now</div>'+live.map(g=>gameCard(g,badge(g))).join(''); }
+  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge(g))).join(''); }
+  if (finished.length) { html += '<div class="day-label">Recent results</div>'+finished.map(g=>gameCard(g,badge(g))).join(''); }
+  if (!html)           { html = `<div class="empty"><i class="ti ti-calendar-off"></i>No games to show.</div>`; }
+  document.getElementById('schedule-list').innerHTML = html;
+  applySpoilers();
+  updateCountdowns();
+}
+
+// ── SCORES ────────────────────────────────────────────────────────────────
+function renderScores() {
+  const live     = GAMES.filter(g=>g.status==='live');
+  const finished = GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html = '';
+  if (live.length) {
+    html += '<div class="day-label">Live now</div>';
+    html += live.map(g=>{
+      const hL = g.homeScore>g.awayScore;
+      return `<div class="score-card" style="border-left:3px solid var(--live-red);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px;">${g.league}</div><span style="font-size:12px;color:var(--text-secondary);">${g.round}</span></div>
+          <span class="live-dot"><span class="dot"></span>${g.quarter}</span>
+        </div>
+        <div class="score-row"><span class="team-name">${g.away}</span><span class="pts ${!hL?'leading':''}">${g.awayScore}</span></div>
+        <div class="divider-score"></div>
+        <div class="score-row"><span class="team-name">${g.home}</span><span class="pts ${hL?'leading':''}">${g.homeScore}</span></div>
+        <div class="meta" style="margin-top:8px;"><i class="ti ti-device-tv" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${g.tv}</div>
+      </div>`;
+    }).join('');
+  }
+  if (finished.length) {
+    html += '<div class="day-label">Final scores</div>';
+    html += finished.map(g=>{
+      const hW = g.homeScore>g.awayScore;
+      const sp = 'spoiler-wrap';
+      return `<div class="score-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px;">${g.league}</div><span style="font-size:12px;color:var(--text-secondary);">${g.round} · ${toRODate(g.time)}</span></div>
+        <div class="score-row"><span class="team-name" style="font-weight:${!hW?600:400}">${g.away}${!hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${!hW?'leading':''} ${sp}"><span class="score-val">${g.awayScore}</span></span></div>
+        <div class="divider-score"></div>
+        <div class="score-row"><span class="team-name" style="font-weight:${hW?600:400}">${g.home}${hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${hW?'leading':''} ${sp}"><span class="score-val">${g.homeScore}</span></span></div>
+      </div>`;
+    }).join('');
+  }
+  if (!html) html = `<div class="empty"><i class="ti ti-ball-basketball"></i>No live games right now.</div>`;
+  document.getElementById('scores-list').innerHTML = html;
+  applySpoilers();
+}
+
+// ── BRACKET ───────────────────────────────────────────────────────────────
+function renderBracket() {
+  ['West','East'].forEach(conf => {
+    const data = BRACKET[conf];
+    let html = '';
+    data.series.forEach(s => {
+      const tW = s.top.wins, bW = s.bot.wins;
+      const done = tW===4||bW===4;
+      html += `<div class="bracket-col">
+        <div class="bracket-matchup${s.active?' active':''}">
+          <div class="bracket-team ${tW>bW?'winner':''}">
+            <span class="seed">${s.top.seed}</span><span class="bteam">${s.top.name}</span><span class="bscore">${tW}</span>
+          </div>
+          <div style="height:1px;background:var(--border);margin:5px 0;"></div>
+          <div class="bracket-team ${bW>tW?'winner':''}">
+            <span class="seed">${s.bot.seed}</span><span class="bteam">${s.bot.name}</span><span class="bscore">${bW}</span>
+          </div>
+          <div class="bracket-series">${done ? (tW===4?s.top.name:s.bot.name)+' wins' : tW+'-'+bW}</div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('bracket-'+conf.toLowerCase()).innerHTML = html;
+  });
+}
+
+// ── STANDINGS ─────────────────────────────────────────────────────────────
+function renderStandings() {
+  const teams = STANDINGS[currentConf];
+  let rows = teams.map(t=>`
+    <tr class="${t.rank<=8?'playoff-row':''}">
+      <td>${t.rank}</td><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td>
+      <td>${t.pct.toFixed(3)}</td><td><span class="clinched-tag">${t.tag}</span></td>
+    </tr>`).join('');
+  document.getElementById('standings-table').innerHTML = `
+    <table><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PCT</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+// ── U-BT ──────────────────────────────────────────────────────────────────
+function renderUBT() {
+  const badge = `<div class="league-badge ubt" style="font-size:9px;font-weight:700;margin-top:2px;">U-BT</div>`;
+  const upcoming = UBT_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished = UBT_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html = '';
+  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join(''); }
+  if (finished.length) { html += '<div class="day-label">2025-26 results</div>'+finished.map(g=>{
+    const ubtHome = g.home.includes('U-BT');
+    const won = ubtHome ? g.homeScore>g.awayScore : g.awayScore>g.homeScore;
+    return `<div class="game-card">
+      ${badge}
+      <div class="game-teams">
+        <div class="matchup">${g.away} @ ${g.home}</div>
+        <div class="meta">${g.round} · ${toRODate(g.time)}</div>
+        <div class="tag-row"><span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px;"></i>${g.tv}</span></div>
+      </div>
+      <div class="game-right">
+        <div class="spoiler-wrap"><span class="score-val" style="font-size:15px;font-weight:500;color:${won?'var(--win-green)':'var(--text-secondary)'};">${g.awayScore}–${g.homeScore}</span></div>
+        <div class="meta">${won?'✓ U-BT W':'Final'}</div>
+      </div>
+    </div>`;
+  }).join('');}
+  document.getElementById('ubt-games-list').innerHTML = html || `<div class="section-empty">No games on record.</div>`;
+  // roster
+  document.getElementById('ubt-roster').innerHTML = UBT_ROSTER.map(p=>`
+    <div class="player-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="player-num">#${p.num}</div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-pos">${p.pos}</div>
+        </div>
+        <div class="player-flag">${p.flag}</div>
+      </div>
+    </div>`).join('');
+  applySpoilers();
+  updateCountdowns();
+}
+
+// ── ROMANIA ───────────────────────────────────────────────────────────────
+function renderRomania() {
+  const badge = `<div class="league-badge ro" style="font-size:16px;">🇷🇴</div>`;
+  const upcoming = ROMANIA_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished = ROMANIA_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html = '';
+  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join(''); }
+  if (finished.length) { html += '<div class="day-label">Results</div>'+finished.map(g=>gameCard(g,badge)).join(''); }
+  if (!html) html = `<div class="section-empty">No fixtures scheduled yet — check back in autumn 2026.</div>`;
+  document.getElementById('romania-games').innerHTML = html;
+  updateCountdowns();
+}
+
+// ── STARS ─────────────────────────────────────────────────────────────────
+function renderSpotlight() {
+  const s = STARS[spotlightIdx];
+  const statsHtml = Object.entries(s.stats).map(([k,v])=>`
+    <div class="stat-block"><div class="stat-val">${v}</div><div class="stat-lbl">${k}</div></div>`).join('');
+  const dotsHtml = STARS.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
+  document.getElementById('spotlight-card').innerHTML = `
+    <div class="spotlight-label">⭐ Player Spotlight</div>
+    <div class="spotlight-name">${s.name}</div>
+    <div class="spotlight-team">${s.team} · ${s.pos}</div>
+    <div class="spotlight-stats">${statsHtml}</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:10px;">${s.note}</div>
+    <div class="spotlight-nav">${dotsHtml}</div>`;
+}
+function setSpotlight(i) { spotlightIdx=i; renderSpotlight(); }
+function renderStars() {
+  renderSpotlight();
+  document.getElementById('stars-grid').innerHTML = STARS.map((s,i)=>`
+    <div class="player-card" onclick="setSpotlight(${i})" style="cursor:pointer;transition:border-color .15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor=''">
+      <div class="player-name" style="font-size:14px;">${s.name}</div>
+      <div class="player-pos" style="margin-bottom:8px;">${s.team}</div>
+      <div style="display:flex;gap:14px;">
+        ${Object.entries(s.stats).map(([k,v])=>`<div><div style="font-size:15px;font-weight:600;color:var(--accent-text);">${v}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">${k}</div></div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['schedule','scores','bracket','standings','ubt','romania','stars'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===tab?'':'none';
+  });
+}
+function filterLeague(l,btn) { currentLeague=l; document.querySelectorAll('#tab-schedule .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderSchedule(); }
+function filterConf(c,btn)   { currentConf=c;  document.querySelectorAll('#tab-standings .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderStandings(); }
+
+// ── LOAD ──────────────────────────────────────────────────────────────────
+function loadData() {
+  renderSchedule(); renderScores(); renderBracket(); renderStandings(); renderUBT(); renderRomania(); renderStars();
+  document.getElementById('last-updated').textContent =
+    'Last updated: '+new Date().toLocaleString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+' RO time';
+  updateTitle();
+}
+
+// auto-spotlight cycle
+setInterval(()=>{ spotlightIdx=(spotlightIdx+1)%STARS.length; if(document.getElementById('tab-stars').style.display!=='none') renderSpotlight(); }, 8000);
+
+registerSW();
+initReminders();
+loadData();
+</script>
+</body>
+</html>
