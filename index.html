@@ -191,6 +191,25 @@
 
     .last-updated { font-size:12px; color:var(--text-muted); text-align:center; margin-top:2rem; }
 
+    /* ── HEADSHOTS ── */
+    .star-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); overflow:hidden; cursor:pointer; transition:border-color .15s, transform .15s; }
+    .star-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .star-img-wrap { width:100%; aspect-ratio:260/190; background:linear-gradient(135deg,#1d428a 0%,#0d1117 100%); overflow:hidden; position:relative; }
+    body.light .star-img-wrap { background:linear-gradient(135deg,#dbeafe,#f3f4f6); }
+    .star-img { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+    .star-img-err { display:none; }
+    .star-flag { position:absolute; top:6px; right:7px; font-size:18px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+    .star-body { padding:10px 12px; }
+    .star-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.3; }
+    .star-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; margin-bottom:8px; }
+    .star-stats { display:flex; gap:12px; flex-wrap:wrap; }
+    .star-stat-val { font-size:15px; font-weight:600; color:var(--accent-text); }
+    .star-stat-lbl { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+
+    /* Spotlight headshot */
+    .spotlight-img { width:80px; height:58px; object-fit:cover; object-position:top; border-radius:8px; flex-shrink:0; }
+    .spotlight-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+
     /* ── NEWS ── */
     .news-list { display:flex; flex-direction:column; gap:8px; }
     .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:13px 15px; text-decoration:none; display:block; transition:border-color .15s; }
@@ -631,29 +650,35 @@ const UBT_ROSTER = [
   { num:44, name:'Vlad Moldoveanu',  pos:'F',  flag:'🇷🇴' },
 ];
 
+// NBA CDN headshot: https://cdn.nba.com/headshots/nba/latest/260x190/{nbaId}.png
+// FIBA/EuroCup players: use ESPN combiner or a fallback avatar
+const NBA_IMG  = id => `https://cdn.nba.com/headshots/nba/latest/260x190/${id}.png`;
+const ESPN_IMG = id => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=260&h=190`;
+const AVATAR   = (name, color='1d428a') => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color}&color=fff&size=260&bold=true`;
+
 const STARS_NBA = [
-  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', flag:'🇨🇦', stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'Led OKC to best record in the West; MVP frontrunner and effortless scorer' },
-  { name:'Victor Wembanyama', team:'San Antonio Spurs', pos:'C', flag:'🇫🇷', stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" once-in-a-generation player — shoots 3s, blocks everything, handles like a guard' },
-  { name:'Nikola Jokić', team:'Denver Nuggets', pos:'C', flag:'🇷🇸', stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP and the best passing big man ever. Watch every single possession' },
-  { name:'LeBron James', team:'Los Angeles Lakers', pos:'F', flag:'🇺🇸', stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Living history — the GOAT debate is happening in real time' },
-  { name:'Jayson Tatum', team:'Boston Celtics', pos:'F', flag:'🇺🇸', stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer and elite clutch performer' },
-  { name:'Stephen Curry', team:'Golden State Warriors', pos:'G', flag:'🇺🇸', stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Revolutionised basketball. The greatest shooter in the history of the sport' },
+  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', flag:'🇨🇦', img:NBA_IMG('1628983'),  stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'2× MVP — effortless scorer, elite defender. Led OKC to the best record in the West' },
+  { name:'Victor Wembanyama',        team:'San Antonio Spurs',     pos:'C', flag:'🇫🇷', img:NBA_IMG('1641705'),  stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" once-in-a-generation talent — shoots 3s, blocks everything, handles like a guard' },
+  { name:'Nikola Jokić',             team:'Denver Nuggets',         pos:'C', flag:'🇷🇸', img:NBA_IMG('203999'),   stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP and the best passing big man ever. Watch every single possession' },
+  { name:'LeBron James',             team:'Los Angeles Lakers',     pos:'F', flag:'🇺🇸', img:NBA_IMG('2544'),     stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Living history — the GOAT debate is happening in real time' },
+  { name:'Jayson Tatum',             team:'Boston Celtics',         pos:'F', flag:'🇺🇸', img:NBA_IMG('1628369'),  stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer and elite clutch performer' },
+  { name:'Stephen Curry',            team:'Golden State Warriors',  pos:'G', flag:'🇺🇸', img:NBA_IMG('201939'),   stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Revolutionised basketball. The greatest shooter in the history of the sport' },
 ];
 
 const STARS_FIBA = [
-  { name:'Giannis Antetokounmpo', team:'Greece / Milwaukee Bucks', pos:'F', flag:'🇬🇷', stats:{PTS:30.4,REB:11.8,AST:6.5}, note:'The Greek Freak. Two-time MVP, NBA champion — one of the most physically imposing players ever' },
-  { name:'Luka Dončić', team:'Slovenia / Dallas Mavericks', pos:'G', flag:'🇸🇮', stats:{PTS:29.8,REB:8.6,AST:8.8}, note:'EuroLeague MVP at 18, NBA Finals MVP — the best European player of his generation' },
-  { name:'Bogdan Bogdanović', team:'Serbia / Atlanta Hawks', pos:'G', flag:'🇷🇸', stats:{PTS:18.4,REB:3.2,AST:4.1}, note:'Elite European shooter and playmaker — dangerous in FIBA windows for Serbia' },
-  { name:'Rudy Gobert', team:'France / Minnesota Timberwolves', pos:'C', flag:'🇫🇷', stats:{PTS:14.2,REB:11.8,BLK:2.1}, note:'4× NBA Defensive Player of the Year — France\'s anchor and the best defensive big in the world' },
-  { name:'Dennis Schröder', team:'Germany / Brooklyn Nets', pos:'G', flag:'🇩🇪', stats:{PTS:17.9,REB:3.4,AST:5.9}, note:'Led Germany to their first EuroBasket title in 2022 — relentless competitor and team leader' },
-  { name:'Alexey Shved', team:'EuroCup / ABA scene', pos:'G', flag:'🇷🇺', stats:{PTS:22.1,REB:4.0,AST:5.2}, note:'EuroCup scoring machine — one of Europe\'s most lethal offensive guards for years' },
+  { name:'Giannis Antetokounmpo', team:'Greece / Milwaukee Bucks',      pos:'F', flag:'🇬🇷', img:NBA_IMG('203507'),  stats:{PTS:30.4,REB:11.8,AST:6.5}, note:'The Greek Freak. 2× MVP, NBA champion — one of the most physically imposing players ever' },
+  { name:'Luka Dončić',           team:'Slovenia / Los Angeles Lakers', pos:'G', flag:'🇸🇮', img:NBA_IMG('1629029'), stats:{PTS:29.8,REB:8.6,AST:8.8}, note:'EuroLeague MVP at 18, NBA Finals MVP — the best European player of his generation' },
+  { name:'Bogdan Bogdanović',     team:'Serbia / Atlanta Hawks',        pos:'G', flag:'🇷🇸', img:NBA_IMG('203992'),  stats:{PTS:18.4,REB:3.2,AST:4.1}, note:'Elite European shooter and playmaker — dangerous in FIBA windows for Serbia' },
+  { name:'Rudy Gobert',           team:'France / Minnesota TWolves',    pos:'C', flag:'🇫🇷', img:NBA_IMG('203497'),  stats:{PTS:14.2,REB:11.8,BLK:2.1}, note:'4× NBA Defensive Player of the Year — France\'s anchor and best defensive big in the world' },
+  { name:'Dennis Schröder',       team:'Germany / Brooklyn Nets',       pos:'G', flag:'🇩🇪', img:NBA_IMG('203471'),  stats:{PTS:17.9,REB:3.4,AST:5.9}, note:'Led Germany to EuroBasket glory 2022 — relentless competitor and born team leader' },
+  { name:'Nikola Mirotić',        team:'EuroLeague legend',             pos:'F', flag:'🇲🇪', img:AVATAR('NM','0a5c36'), stats:{PTS:19.4,REB:6.8,AST:2.1}, note:'One of the greatest European big men of his era — deadly shooter, EuroLeague champion' },
 ];
 
 const STARS_UBT = [
-  { name:'Daron Russell', team:'U-BT Cluj-Napoca', pos:'PG', flag:'🇺🇸', stats:{PTS:18.2,AST:5.8,REB:3.1}, note:'Team leader and engine — controls tempo and creates offense for everyone around him' },
-  { name:'Mitchell Creek', team:'U-BT Cluj-Napoca', pos:'SF', flag:'🇦🇺', stats:{PTS:15.4,REB:7.2,AST:2.1}, note:'Athletic Australian forward — motor never stops, great on both ends of the floor' },
-  { name:'Augustas Marčiulionis', team:'U-BT Cluj-Napoca', pos:'SG', flag:'🇱🇹', stats:{PTS:13.8,REB:2.9,AST:3.4}, note:'Son of Šarūnas Marčiulionis — sharpshooting guard with elite basketball IQ' },
-  { name:'Vlad Moldoveanu', team:'U-BT Cluj-Napoca', pos:'F', flag:'🇷🇴', stats:{PTS:9.4,REB:4.8,AST:1.2}, note:'Romanian international and fan favourite — pride of the local fanbase at BTarena' },
+  { name:'Daron Russell',           team:'U-BT Cluj-Napoca', pos:'PG', flag:'🇺🇸', img:AVATAR('DR','1d428a'), stats:{PTS:18.2,AST:5.8,REB:3.1}, note:'Team leader and engine — controls tempo and creates offense for everyone around him' },
+  { name:'Mitchell Creek',          team:'U-BT Cluj-Napoca', pos:'SF', flag:'🇦🇺', img:AVATAR('MC','1d428a'), stats:{PTS:15.4,REB:7.2,AST:2.1}, note:'Athletic Australian forward — motor never stops, great on both ends of the floor' },
+  { name:'Augustas Marčiulionis',   team:'U-BT Cluj-Napoca', pos:'SG', flag:'🇱🇹', img:AVATAR('AM','1d428a'), stats:{PTS:13.8,REB:2.9,AST:3.4}, note:'Son of Šarūnas Marčiulionis — sharpshooting guard with elite basketball IQ' },
+  { name:'Vlad Moldoveanu',         team:'U-BT Cluj-Napoca', pos:'F',  flag:'🇷🇴', img:AVATAR('VM','c8a44a'), stats:{PTS:9.4,REB:4.8,AST:1.2}, note:'Romanian international and fan favourite — pride of the local fanbase at BTarena' },
 ];
 
 // Spotlight cycles through all stars
@@ -904,9 +929,14 @@ function renderSpotlight() {
     <div class="stat-block"><div class="stat-val">${v}</div><div class="stat-lbl">${k}</div></div>`).join('');
   const dotsHtml = STARS_ALL.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
   document.getElementById('spotlight-card').innerHTML = `
-    <div class="spotlight-label">⭐ Player Spotlight · ${s.flag||''} ${s.team}</div>
-    <div class="spotlight-name">${s.name}</div>
-    <div class="spotlight-team">${s.pos} · ${s.team}</div>
+    <div class="spotlight-label">⭐ Player Spotlight</div>
+    <div class="spotlight-top">
+      <img class="spotlight-img" src="${s.img}" alt="${s.name}" onerror="this.style.display='none'">
+      <div>
+        <div class="spotlight-name">${s.name} ${s.flag||''}</div>
+        <div class="spotlight-team">${s.pos} · ${s.team}</div>
+      </div>
+    </div>
     <div class="spotlight-stats">${statsHtml}</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:10px;">${s.note}</div>
     <div class="spotlight-nav">${dotsHtml}</div>`;
@@ -914,14 +944,17 @@ function renderSpotlight() {
 function setSpotlight(i) { spotlightIdx=i; renderSpotlight(); }
 
 function starCard(s, i) {
-  return `<div class="player-card" onclick="setSpotlight(${i})" style="cursor:pointer;transition:border-color .15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor=''">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-      <div class="player-name" style="font-size:13px;">${s.name}</div>
-      <span style="font-size:14px;">${s.flag||''}</span>
+  return `<div class="star-card" onclick="setSpotlight(${i})">
+    <div class="star-img-wrap">
+      <img class="star-img" src="${s.img}" alt="${s.name}" onerror="this.src='${AVATAR(s.name)}'">
+      <span class="star-flag">${s.flag||''}</span>
     </div>
-    <div class="player-pos" style="margin-bottom:8px;font-size:11px;">${s.team}</div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      ${Object.entries(s.stats).map(([k,v])=>`<div><div style="font-size:15px;font-weight:600;color:var(--accent-text);">${v}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">${k}</div></div>`).join('')}
+    <div class="star-body">
+      <div class="star-name">${s.name}</div>
+      <div class="star-meta">${s.pos} · ${s.team}</div>
+      <div class="star-stats">
+        ${Object.entries(s.stats).map(([k,v])=>`<div><div class="star-stat-val">${v}</div><div class="star-stat-lbl">${k}</div></div>`).join('')}
+      </div>
     </div>
   </div>`;
 }
