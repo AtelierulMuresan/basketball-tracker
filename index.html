@@ -191,6 +191,17 @@
 
     .last-updated { font-size:12px; color:var(--text-muted); text-align:center; margin-top:2rem; }
 
+    /* ── NEWS ── */
+    .news-list { display:flex; flex-direction:column; gap:8px; }
+    .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:13px 15px; text-decoration:none; display:block; transition:border-color .15s; }
+    .news-card:hover { border-color:var(--accent); }
+    .news-title { font-size:14px; font-weight:500; color:var(--text); line-height:1.4; margin-bottom:5px; }
+    .news-meta  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .news-source { font-size:11px; font-weight:600; color:var(--accent-text); }
+    .news-date   { font-size:11px; color:var(--text-muted); }
+    .news-desc   { font-size:12px; color:var(--text-secondary); margin-top:5px; line-height:1.5; }
+    .news-error  { text-align:center; padding:2rem; color:var(--text-secondary); font-size:13px; }
+
     @media (max-width:480px) {
       .app { padding:1rem .75rem 4rem; }
       .matchup { font-size:13px; }
@@ -234,6 +245,7 @@
     <button class="tab" onclick="switchTab('ubt',this)">U-BT Cluj</button>
     <button class="tab" onclick="switchTab('romania',this)">🇷🇴 Romania</button>
     <button class="tab" onclick="switchTab('stars',this)">Stars</button>
+    <button class="tab" onclick="switchTab('news',this)">📰 News</button>
   </div>
 
   <!-- SCHEDULE TAB -->
@@ -323,7 +335,27 @@
   <!-- STARS TAB -->
   <div id="tab-stars" style="display:none;">
     <div id="spotlight-card" class="spotlight-card"></div>
-    <div id="stars-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:4px;"></div>
+
+    <div class="day-label" style="margin-top:1.25rem;">NBA Stars</div>
+    <div id="stars-nba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
+
+    <div class="day-label" style="margin-top:1.5rem;">FIBA Stars to Watch</div>
+    <div id="stars-fiba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
+
+    <div class="day-label" style="margin-top:1.5rem;">U-BT Cluj Key Players</div>
+    <div id="stars-ubt" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
+  </div>
+
+  <!-- NEWS TAB -->
+  <div id="tab-news" style="display:none;">
+    <div class="filters">
+      <button class="filter-btn active" onclick="switchNews('nba',this)">NBA</button>
+      <button class="filter-btn" onclick="switchNews('fiba',this)">FIBA / Europe</button>
+      <button class="filter-btn" onclick="switchNews('ubt',this)">U-BT & Romania</button>
+    </div>
+    <div id="news-nba"  class="news-list"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
+    <div id="news-fiba" class="news-list" style="display:none;"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
+    <div id="news-ubt"  class="news-list" style="display:none;"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
   </div>
 
   <div class="last-updated" id="last-updated"></div>
@@ -599,14 +631,33 @@ const UBT_ROSTER = [
   { num:44, name:'Vlad Moldoveanu',  pos:'F',  flag:'🇷🇴' },
 ];
 
-const STARS = [
-  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'Led OKC to best record in the West; MVP frontrunner' },
-  { name:'Victor Wembanyama', team:'San Antonio Spurs', pos:'C', stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" unicorn — blocks, shoots 3s, handles the ball. Unprecedented' },
-  { name:'Nikola Jokić', team:'Denver Nuggets', pos:'C', stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP. Best passing big man of all time. Watch every possession' },
-  { name:'LeBron James', team:'Los Angeles Lakers', pos:'F', stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Greatest of all time debate in real time' },
-  { name:'Jayson Tatum', team:'Boston Celtics', pos:'F', stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer, elite clutch player' },
-  { name:'Stephen Curry', team:'Golden State Warriors', pos:'G', stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Changed how basketball is played. Greatest shooter ever' },
+const STARS_NBA = [
+  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', flag:'🇨🇦', stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'Led OKC to best record in the West; MVP frontrunner and effortless scorer' },
+  { name:'Victor Wembanyama', team:'San Antonio Spurs', pos:'C', flag:'🇫🇷', stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" once-in-a-generation player — shoots 3s, blocks everything, handles like a guard' },
+  { name:'Nikola Jokić', team:'Denver Nuggets', pos:'C', flag:'🇷🇸', stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP and the best passing big man ever. Watch every single possession' },
+  { name:'LeBron James', team:'Los Angeles Lakers', pos:'F', flag:'🇺🇸', stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Living history — the GOAT debate is happening in real time' },
+  { name:'Jayson Tatum', team:'Boston Celtics', pos:'F', flag:'🇺🇸', stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer and elite clutch performer' },
+  { name:'Stephen Curry', team:'Golden State Warriors', pos:'G', flag:'🇺🇸', stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Revolutionised basketball. The greatest shooter in the history of the sport' },
 ];
+
+const STARS_FIBA = [
+  { name:'Giannis Antetokounmpo', team:'Greece / Milwaukee Bucks', pos:'F', flag:'🇬🇷', stats:{PTS:30.4,REB:11.8,AST:6.5}, note:'The Greek Freak. Two-time MVP, NBA champion — one of the most physically imposing players ever' },
+  { name:'Luka Dončić', team:'Slovenia / Dallas Mavericks', pos:'G', flag:'🇸🇮', stats:{PTS:29.8,REB:8.6,AST:8.8}, note:'EuroLeague MVP at 18, NBA Finals MVP — the best European player of his generation' },
+  { name:'Bogdan Bogdanović', team:'Serbia / Atlanta Hawks', pos:'G', flag:'🇷🇸', stats:{PTS:18.4,REB:3.2,AST:4.1}, note:'Elite European shooter and playmaker — dangerous in FIBA windows for Serbia' },
+  { name:'Rudy Gobert', team:'France / Minnesota Timberwolves', pos:'C', flag:'🇫🇷', stats:{PTS:14.2,REB:11.8,BLK:2.1}, note:'4× NBA Defensive Player of the Year — France\'s anchor and the best defensive big in the world' },
+  { name:'Dennis Schröder', team:'Germany / Brooklyn Nets', pos:'G', flag:'🇩🇪', stats:{PTS:17.9,REB:3.4,AST:5.9}, note:'Led Germany to their first EuroBasket title in 2022 — relentless competitor and team leader' },
+  { name:'Alexey Shved', team:'EuroCup / ABA scene', pos:'G', flag:'🇷🇺', stats:{PTS:22.1,REB:4.0,AST:5.2}, note:'EuroCup scoring machine — one of Europe\'s most lethal offensive guards for years' },
+];
+
+const STARS_UBT = [
+  { name:'Daron Russell', team:'U-BT Cluj-Napoca', pos:'PG', flag:'🇺🇸', stats:{PTS:18.2,AST:5.8,REB:3.1}, note:'Team leader and engine — controls tempo and creates offense for everyone around him' },
+  { name:'Mitchell Creek', team:'U-BT Cluj-Napoca', pos:'SF', flag:'🇦🇺', stats:{PTS:15.4,REB:7.2,AST:2.1}, note:'Athletic Australian forward — motor never stops, great on both ends of the floor' },
+  { name:'Augustas Marčiulionis', team:'U-BT Cluj-Napoca', pos:'SG', flag:'🇱🇹', stats:{PTS:13.8,REB:2.9,AST:3.4}, note:'Son of Šarūnas Marčiulionis — sharpshooting guard with elite basketball IQ' },
+  { name:'Vlad Moldoveanu', team:'U-BT Cluj-Napoca', pos:'F', flag:'🇷🇴', stats:{PTS:9.4,REB:4.8,AST:1.2}, note:'Romanian international and fan favourite — pride of the local fanbase at BTarena' },
+];
+
+// Spotlight cycles through all stars
+const STARS_ALL = [...STARS_NBA, ...STARS_FIBA, ...STARS_UBT];
 
 const BRACKET = {
   West: {
@@ -663,9 +714,11 @@ const STANDINGS = {
 };
 
 // ── STATE ─────────────────────────────────────────────────────────────────
-let currentLeague = 'all';
-let currentConf   = 'East';
-let spotlightIdx  = 0;
+let currentLeague  = 'all';
+let currentConf    = 'East';
+let currentNews    = 'nba';
+let spotlightIdx   = 0;
+const newsCache    = {}; // section → articles, so we don't re-fetch on tab switch
 
 // ── RENDER HELPERS ────────────────────────────────────────────────────────
 function gameCard(g, badge, showReminder=true) {
@@ -846,41 +899,102 @@ function renderRomania() {
 
 // ── STARS ─────────────────────────────────────────────────────────────────
 function renderSpotlight() {
-  const s = STARS[spotlightIdx];
+  const s = STARS_ALL[spotlightIdx];
   const statsHtml = Object.entries(s.stats).map(([k,v])=>`
     <div class="stat-block"><div class="stat-val">${v}</div><div class="stat-lbl">${k}</div></div>`).join('');
-  const dotsHtml = STARS.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
+  const dotsHtml = STARS_ALL.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
   document.getElementById('spotlight-card').innerHTML = `
-    <div class="spotlight-label">⭐ Player Spotlight</div>
+    <div class="spotlight-label">⭐ Player Spotlight · ${s.flag||''} ${s.team}</div>
     <div class="spotlight-name">${s.name}</div>
-    <div class="spotlight-team">${s.team} · ${s.pos}</div>
+    <div class="spotlight-team">${s.pos} · ${s.team}</div>
     <div class="spotlight-stats">${statsHtml}</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:10px;">${s.note}</div>
     <div class="spotlight-nav">${dotsHtml}</div>`;
 }
 function setSpotlight(i) { spotlightIdx=i; renderSpotlight(); }
+
+function starCard(s, i) {
+  return `<div class="player-card" onclick="setSpotlight(${i})" style="cursor:pointer;transition:border-color .15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor=''">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div class="player-name" style="font-size:13px;">${s.name}</div>
+      <span style="font-size:14px;">${s.flag||''}</span>
+    </div>
+    <div class="player-pos" style="margin-bottom:8px;font-size:11px;">${s.team}</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      ${Object.entries(s.stats).map(([k,v])=>`<div><div style="font-size:15px;font-weight:600;color:var(--accent-text);">${v}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">${k}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
 function renderStars() {
   renderSpotlight();
-  document.getElementById('stars-grid').innerHTML = STARS.map((s,i)=>`
-    <div class="player-card" onclick="setSpotlight(${i})" style="cursor:pointer;transition:border-color .15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor=''">
-      <div class="player-name" style="font-size:14px;">${s.name}</div>
-      <div class="player-pos" style="margin-bottom:8px;">${s.team}</div>
-      <div style="display:flex;gap:14px;">
-        ${Object.entries(s.stats).map(([k,v])=>`<div><div style="font-size:15px;font-weight:600;color:var(--accent-text);">${v}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">${k}</div></div>`).join('')}
+  document.getElementById('stars-nba').innerHTML  = STARS_NBA.map((s,i)=>starCard(s,i)).join('');
+  document.getElementById('stars-fiba').innerHTML = STARS_FIBA.map((s,i)=>starCard(s,STARS_NBA.length+i)).join('');
+  document.getElementById('stars-ubt').innerHTML  = STARS_UBT.map((s,i)=>starCard(s,STARS_NBA.length+STARS_FIBA.length+i)).join('');
+}
+
+// ── NEWS ──────────────────────────────────────────────────────────────────
+function timeAgo(isoDate) {
+  const diff = Date.now() - new Date(isoDate);
+  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(h / 24);
+  if (h < 1) return 'just now';
+  if (h < 24) return `${h}h ago`;
+  if (d < 7)  return `${d}d ago`;
+  return new Date(isoDate).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+function renderNewsArticles(articles, elId) {
+  const el = document.getElementById(elId);
+  if (!articles || articles.length === 0) {
+    el.innerHTML = `<div class="news-error"><i class="ti ti-news-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted);"></i>No articles found right now.<br>Check back shortly.</div>`;
+    return;
+  }
+  el.innerHTML = articles.map(a => `
+    <a class="news-card" href="${a.link}" target="_blank" rel="noopener">
+      <div class="news-title">${a.title}</div>
+      <div class="news-meta">
+        <span class="news-source">${a.source}</span>
+        <span class="news-date">${timeAgo(a.pubDate)}</span>
       </div>
-    </div>`).join('');
+      ${a.description ? `<div class="news-desc">${a.description}</div>` : ''}
+    </a>`).join('');
+}
+
+async function fetchNews(section) {
+  if (newsCache[section]) { renderNewsArticles(newsCache[section], 'news-'+section); return; }
+  document.getElementById('news-'+section).innerHTML = `<div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;color:var(--text-muted);"></i>Loading news…</div>`;
+  try {
+    const res = await fetch(WORKER_URL + '/news/' + section, { signal: AbortSignal.timeout(12000) });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const data = await res.json();
+    newsCache[section] = data.articles || [];
+    renderNewsArticles(newsCache[section], 'news-'+section);
+  } catch(err) {
+    document.getElementById('news-'+section).innerHTML = `<div class="news-error"><i class="ti ti-wifi-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted);"></i>Couldn't load news.<br><small style="color:var(--text-muted);">${err.message}</small></div>`;
+  }
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  ['schedule','scores','bracket','standings','ubt','romania','stars'].forEach(t=>{
+  ['schedule','scores','bracket','standings','ubt','romania','stars','news'].forEach(t=>{
     document.getElementById('tab-'+t).style.display = t===tab?'':'none';
   });
+  // Lazy-load news when tab is first opened
+  if (tab === 'news') fetchNews(currentNews);
 }
+
 function filterLeague(l,btn) { currentLeague=l; document.querySelectorAll('#tab-schedule .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderSchedule(); }
-function filterConf(c,btn)   { currentConf=c;  document.querySelectorAll('#tab-standings .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderStandings(); }
+function filterConf(c,btn)   { currentConf=c;   document.querySelectorAll('#tab-standings .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderStandings(); }
+function switchNews(section, btn) {
+  currentNews = section;
+  document.querySelectorAll('#tab-news .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['nba','fiba','ubt'].forEach(s => document.getElementById('news-'+s).style.display = s===section?'':'none');
+  fetchNews(section);
+}
 
 // ── LOAD ──────────────────────────────────────────────────────────────────
 async function loadData() {
@@ -894,14 +1008,12 @@ async function loadData() {
 // Auto-refresh NBA scores every 60 seconds
 async function autoRefreshNBA() {
   await fetchLiveNBA();
-  renderSchedule();
-  renderScores();
-  updateTitle();
+  renderSchedule(); renderScores(); updateTitle();
 }
 setInterval(autoRefreshNBA, 60000);
 
-// auto-spotlight cycle
-setInterval(()=>{ spotlightIdx=(spotlightIdx+1)%STARS.length; if(document.getElementById('tab-stars').style.display!=='none') renderSpotlight(); }, 8000);
+// Auto-spotlight cycle through all stars
+setInterval(()=>{ spotlightIdx=(spotlightIdx+1)%STARS_ALL.length; if(document.getElementById('tab-stars').style.display!=='none') renderSpotlight(); }, 8000);
 
 registerSW();
 initReminders();
