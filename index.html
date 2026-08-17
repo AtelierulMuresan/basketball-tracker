@@ -1,237 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0d1117" id="theme-meta" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="BaskTracker" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d1117" id="theme-meta"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="BaskTracker"/>
   <title>🏀 Basketball Tracker — Romania</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;
+      --border:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.15);
+      --text:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;
+      --nba-blue:#1d428a;--nba-gold:#c8a44a;--fiba-green:#0a5c36;--live-red:#d03030;
+      --accent:#2563eb;--accent-bg:rgba(37,99,235,.12);--accent-text:#60a5fa;
+      --win-green:#4ade80;--warn:#f59e0b;--radius:8px;--card-radius:12px;
+      --shadow:0 2px 8px rgba(0,0,0,.4);
+    }
+    body.light{
+      --bg:#f3f4f6;--surface:#fff;--surface2:#f9fafb;
+      --border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.15);
+      --text:#111827;--text-secondary:#6b7280;--text-muted:#9ca3af;
+      --accent-bg:rgba(37,99,235,.07);--accent-text:#1d4ed8;
+      --win-green:#16a34a;--shadow:0 2px 8px rgba(0,0,0,.08);
+    }
+    body.ubt-mode{--accent:#c8a44a;--accent-bg:rgba(200,164,74,.12);--accent-text:#c8a44a}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5;transition:background .2s,color .2s}
+    .app{max-width:720px;margin:0 auto;padding:1.25rem 1rem 5rem}
 
-    /* ── THEMES ── */
-    :root {
-      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
-      --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15);
-      --text: #e6edf3; --text-secondary: #8b949e; --text-muted: #484f58;
-      --nba-blue: #1d428a; --nba-gold: #c8a44a;
-      --fiba-green: #0a5c36; --live-red: #d03030;
-      --accent: #2563eb; --accent-bg: rgba(37,99,235,0.12); --accent-text: #60a5fa;
-      --win-green: #4ade80; --radius: 8px; --card-radius: 12px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-    body.light {
-      --bg: #f3f4f6; --surface: #ffffff; --surface2: #f9fafb;
-      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.15);
-      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
-      --accent-bg: rgba(37,99,235,0.07); --accent-text: #1d4ed8;
-      --win-green: #16a34a; --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; font-size: 15px; line-height: 1.5;
-      transition: background 0.2s, color 0.2s;
-    }
-    .app { max-width: 720px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+    /* ── NOW BANNER ── */
+    #now-banner{border-radius:var(--card-radius);padding:13px 15px;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s;border:1px solid transparent}
+    #now-banner:hover{opacity:.85}
+    #now-banner.live{background:linear-gradient(135deg,rgba(208,48,48,.18),rgba(208,48,48,.05));border-color:rgba(208,48,48,.35)}
+    #now-banner.upcoming{background:var(--accent-bg);border-color:rgba(37,99,235,.3)}
+    #now-banner.idle{background:var(--surface);border-color:var(--border)}
+    .now-icon{font-size:22px;flex-shrink:0}
+    .now-main{flex:1;min-width:0}
+    .now-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:3px}
+    .now-title{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .now-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
+    .now-right{text-align:right;flex-shrink:0}
+    .now-score{font-size:20px;font-weight:700;color:var(--text)}
+    .now-time{font-size:12px;color:var(--text-secondary)}
 
     /* ── HEADER ── */
-    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:10px; }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .logo { width:42px; height:42px; border-radius:50%; background:var(--nba-blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .logo i { color:var(--nba-gold); font-size:22px; }
-    .app-title { font-size:17px; font-weight:600; }
-    .app-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-    .header-right { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-    .tz-badge { font-size:13px; background:var(--accent-bg); color:var(--accent-text); border-radius:var(--radius); padding:5px 10px; border:1px solid rgba(37,99,235,0.3); display:flex; align-items:center; gap:5px; }
-    .icon-btn { font-size:13px; color:var(--text-secondary); border:1px solid var(--border-strong); border-radius:var(--radius); padding:6px 10px; background:var(--surface); cursor:pointer; display:flex; align-items:center; gap:5px; transition:color .15s,border-color .15s; font-family:inherit; }
-    .icon-btn:hover { color:var(--text); border-color:var(--accent); }
-    .icon-btn.active { color:var(--accent-text); border-color:var(--accent); background:var(--accent-bg); }
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+    .header-left{display:flex;align-items:center;gap:12px}
+    .logo{width:40px;height:40px;border-radius:50%;background:var(--nba-blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .logo i{color:var(--nba-gold);font-size:20px}
+    .app-title{font-size:16px;font-weight:600}
+    .app-sub{font-size:11px;color:var(--text-secondary);margin-top:1px}
+    .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+    .tz-badge{font-size:12px;background:var(--accent-bg);color:var(--accent-text);border-radius:var(--radius);padding:5px 9px;border:1px solid rgba(37,99,235,.3);display:flex;align-items:center;gap:5px}
+    .icon-btn{font-size:12px;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius);padding:6px 9px;background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:4px;transition:color .15s,border-color .15s;font-family:inherit}
+    .icon-btn:hover{color:var(--text);border-color:var(--accent)}
+    .icon-btn.active{color:var(--accent-text);border-color:var(--accent);background:var(--accent-bg)}
+    .icon-btn.ubt-active{color:var(--nba-gold);border-color:var(--nba-gold);background:rgba(200,164,74,.1)}
 
     /* ── TABS ── */
-    .tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:1.25rem; overflow-x:auto; scrollbar-width:none; }
-    .tabs::-webkit-scrollbar { display:none; }
-    .tab { padding:8px 14px; font-size:13px; cursor:pointer; border:none; background:none; color:var(--text-secondary); font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; transition:color .15s; }
-    .tab.active { color:var(--text); border-bottom-color:var(--accent); font-weight:500; }
-    .tab:hover:not(.active) { color:var(--text); }
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1.25rem;overflow-x:auto;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:7px 12px;font-size:12px;cursor:pointer;border:none;background:none;color:var(--text-secondary);font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s}
+    .tab.active{color:var(--text);border-bottom-color:var(--accent);font-weight:500}
+    .tab:hover:not(.active){color:var(--text)}
 
     /* ── FILTERS ── */
-    .filters { display:flex; gap:6px; margin-bottom:1rem; flex-wrap:wrap; }
-    .filter-btn { font-size:12px; padding:4px 12px; border-radius:20px; border:1px solid var(--border-strong); background:none; color:var(--text-secondary); cursor:pointer; font-family:inherit; transition:all .12s; }
-    .filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .filter-btn:hover:not(.active) { color:var(--text); }
+    .filters{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+    .filter-btn{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border-strong);background:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .12s}
+    .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .filter-btn:hover:not(.active){color:var(--text)}
 
     /* ── DAY LABEL ── */
-    .day-label { font-size:11px; color:var(--text-muted); font-weight:600; margin:1.25rem 0 8px; text-transform:uppercase; letter-spacing:.07em; }
+    .day-label{font-size:11px;color:var(--text-muted);font-weight:600;margin:1.25rem 0 8px;text-transform:uppercase;letter-spacing:.07em}
 
     /* ── GAME CARD ── */
-    .games-list { display:flex; flex-direction:column; gap:6px; }
-    .game-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:12px 14px; display:flex; align-items:flex-start; gap:12px; transition:border-color .15s; }
-    .game-card:hover { border-color:var(--border-strong); }
-    .game-card.live { border-left:3px solid var(--live-red); }
-    .league-badge { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; letter-spacing:.02em; margin-top:2px; }
-    .league-badge.nba { background:var(--nba-blue); color:var(--nba-gold); }
-    .league-badge.fiba { background:var(--fiba-green); color:#fff; }
-    .league-badge.ubt { background:#1a1a1a; color:#fff; border:1px solid #444; }
-    .league-badge.ro { background:#002B7F; color:#FCD116; }
-    .game-teams { flex:1; min-width:0; }
-    .matchup { font-size:14px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-    .game-right { text-align:right; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
-    .time-ro { font-size:15px; font-weight:500; }
-    .live-dot { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--live-red); font-weight:500; }
-    .dot { width:7px; height:7px; background:var(--live-red); border-radius:50%; animation:pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .games-list{display:flex;flex-direction:column;gap:6px}
+    .game-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s}
+    .game-card:hover{border-color:var(--border-strong)}
+    .game-card.live{border-left:3px solid var(--live-red)}
+    .game-card.ubt-highlighted{border-color:var(--nba-gold)!important;background:rgba(200,164,74,.05)}
+    .league-badge{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;letter-spacing:.02em;margin-top:2px}
+    .league-badge.nba{background:var(--nba-blue);color:var(--nba-gold)}
+    .league-badge.fiba{background:var(--fiba-green);color:#fff}
+    .league-badge.ubt{background:#1a1a1a;color:#fff;border:1px solid #444}
+    .league-badge.ro{background:#002B7F;color:#FCD116;font-size:16px}
+    .game-teams{flex:1;min-width:0}
+    .matchup{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{font-size:12px;color:var(--text-secondary);margin-top:2px}
+    .game-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+    .time-ro{font-size:15px;font-weight:500}
+    .live-dot{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--live-red);font-weight:500}
+    .dot{width:7px;height:7px;background:var(--live-red);border-radius:50%;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* ── TV + REMINDER TAGS ── */
-    .tag-row { display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; align-items:center; }
-    .tv-tag { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; padding:2px 7px; border-radius:4px; white-space:nowrap; }
-    .tv-tag.antenaplay { background:#6b21a8; color:#e9d5ff; }
-    .tv-tag.tvr        { background:#0a5c36; color:#bbf7d0; }
-    .tv-tag.abaliga    { background:#b45309; color:#fde68a; }
-    .tv-tag.eurocup    { background:#1d428a; color:#bfdbfe; }
-    .tv-tag.digi       { background:#374151; color:#d1d5db; }
-    .reminder-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid var(--border-strong); background:none; color:var(--text-secondary); cursor:pointer; font-family:inherit; transition:all .12s; white-space:nowrap; }
-    .reminder-btn.set { background:rgba(234,179,8,.15); color:#ca8a04; border-color:#ca8a04; }
-    .reminder-btn:hover:not(.set) { border-color:var(--accent); color:var(--accent-text); }
+    /* ── TAGS ── */
+    .tag-row{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
+    .tv-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;white-space:nowrap}
+    .tv-tag.antenaplay{background:#6b21a8;color:#e9d5ff}
+    .tv-tag.tvr{background:#0a5c36;color:#bbf7d0}
+    .tv-tag.abaliga{background:#b45309;color:#fde68a}
+    .tv-tag.eurocup{background:#1d428a;color:#bfdbfe}
+    .tv-tag.digi{background:#374151;color:#d1d5db}
+    .reminder-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;border:1px solid var(--border-strong);background:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+    .reminder-btn.set{background:rgba(234,179,8,.15);color:#ca8a04;border-color:#ca8a04}
+    .reminder-btn:hover:not(.set){border-color:var(--accent);color:var(--accent-text)}
+    .share-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;border:1px solid var(--border-strong);background:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+    .share-btn:hover{border-color:#25d366;color:#25d366}
 
-    /* ── COUNTDOWN ── */
-    .countdown { font-size:11px; color:var(--accent-text); margin-top:2px; }
+    /* ── SPOILER ── */
+    .spoiler-hidden .score-val{filter:blur(5px);user-select:none}
+    .countdown{font-size:11px;color:var(--accent-text);margin-top:2px}
 
-    /* ── SPOILER TOGGLE ── */
-    .spoiler-wrap { position:relative; display:inline-block; }
-    .spoiler-hidden .score-val { filter:blur(5px); user-select:none; }
-    .spoiler-btn { font-size:10px; color:var(--text-muted); cursor:pointer; background:none; border:none; font-family:inherit; padding:0; display:block; margin-top:1px; }
-
-    /* ── SCORES VIEW ── */
-    .scores-view { display:flex; flex-direction:column; gap:8px; }
-    .score-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:14px 16px; }
-    .score-row { display:flex; align-items:center; justify-content:space-between; }
-    .team-name { font-size:14px; color:var(--text); font-weight:500; }
-    .pts { font-size:18px; font-weight:600; color:var(--text); min-width:36px; text-align:right; }
-    .pts.leading { color:var(--accent-text); }
-    .divider-score { height:1px; background:var(--border); margin:10px 0; }
-    .win-tag { font-size:11px; color:var(--win-green); margin-left:5px; }
-
-    /* ── STANDINGS ── */
-    .standings-wrap { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    thead tr { border-bottom:1px solid var(--border); }
-    th { padding:7px 10px; color:var(--text-muted); font-weight:500; text-align:center; }
-    th:first-child, th:nth-child(2) { text-align:left; }
-    td { padding:9px 10px; border-bottom:1px solid var(--border); color:var(--text-secondary); text-align:center; }
-    td:first-child { color:var(--text-muted); }
-    td:nth-child(2) { text-align:left; color:var(--text); }
-    tr:last-child td { border-bottom:none; }
-    .clinched-tag { font-size:11px; color:var(--accent-text); }
-    .playoff-row td:nth-child(2) { font-weight:500; }
+    /* ── SCORES ── */
+    .scores-view{display:flex;flex-direction:column;gap:8px}
+    .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px 16px}
+    .score-row{display:flex;align-items:center;justify-content:space-between}
+    .team-name{font-size:14px;color:var(--text);font-weight:500}
+    .pts{font-size:18px;font-weight:600;color:var(--text);min-width:36px;text-align:right}
+    .pts.leading{color:var(--accent-text)}
+    .divider-score{height:1px;background:var(--border);margin:10px 0}
+    .win-tag{font-size:11px;color:var(--win-green);margin-left:5px}
 
     /* ── BRACKET ── */
-    .bracket-wrap { overflow-x:auto; padding-bottom:8px; }
-    .bracket { display:flex; gap:0; min-width:560px; }
-    .bracket-col { display:flex; flex-direction:column; flex:1; }
-    .bracket-col-label { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; text-align:center; margin-bottom:10px; padding:0 4px; }
-    .bracket-matchup { background:var(--surface); border:1px solid var(--border); border-radius:8px; margin:4px; padding:8px 10px; }
-    .bracket-matchup.active { border-color:var(--accent); }
-    .bracket-team { display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:12px; }
-    .bracket-team .seed { color:var(--text-muted); margin-right:6px; font-size:11px; }
-    .bracket-team .bteam { flex:1; color:var(--text-secondary); }
-    .bracket-team.winner .bteam { color:var(--text); font-weight:600; }
-    .bracket-team .bscore { font-size:12px; color:var(--text-secondary); }
-    .bracket-team.winner .bscore { color:var(--text); font-weight:600; }
-    .bracket-connector { display:flex; flex-direction:column; justify-content:center; }
-    .connector-spacer { flex:1; }
-    .bracket-series { font-size:10px; color:var(--accent-text); text-align:center; margin-top:3px; }
-    .bracket-spacer { flex:1; min-height:20px; }
+    .bracket-wrap{overflow-x:auto;padding-bottom:8px}
+    .bracket{display:flex;gap:0;min-width:500px}
+    .bracket-col{display:flex;flex-direction:column;flex:1}
+    .bracket-matchup{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:4px;padding:8px 10px}
+    .bracket-matchup.active{border-color:var(--accent)}
+    .bracket-team{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px}
+    .bracket-team .seed{color:var(--text-muted);margin-right:6px;font-size:11px}
+    .bracket-team .bteam{flex:1;color:var(--text-secondary)}
+    .bracket-team.winner .bteam{color:var(--text);font-weight:600}
+    .bracket-team .bscore,.bracket-team.winner .bscore{font-size:12px}
+    .bracket-team.winner .bscore{color:var(--text);font-weight:600}
+    .bracket-series{font-size:10px;color:var(--accent-text);text-align:center;margin-top:4px}
+
+    /* ── STANDINGS ── */
+    .standings-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead tr{border-bottom:1px solid var(--border)}
+    th{padding:7px 10px;color:var(--text-muted);font-weight:500;text-align:center}
+    th:first-child,th:nth-child(2){text-align:left}
+    td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary);text-align:center}
+    td:first-child{color:var(--text-muted)}
+    td:nth-child(2){text-align:left;color:var(--text)}
+    tr:last-child td{border-bottom:none}
+    .playoff-row td:nth-child(2){font-weight:500}
+    .clinched-tag{font-size:11px;color:var(--accent-text)}
 
     /* ── SPOTLIGHT ── */
-    .spotlight-card { background:linear-gradient(135deg, #1d428a 0%, #0d1117 100%); border:1px solid rgba(37,99,235,0.3); border-radius:var(--card-radius); padding:16px; margin-bottom:1rem; position:relative; overflow:hidden; }
-    body.light .spotlight-card { background:linear-gradient(135deg, #dbeafe 0%, #f3f4f6 100%); border-color:rgba(37,99,235,0.2); }
-    .spotlight-label { font-size:10px; color:rgba(255,255,255,0.5); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
-    body.light .spotlight-label { color:var(--text-muted); }
-    .spotlight-name { font-size:20px; font-weight:700; color:#fff; }
-    body.light .spotlight-name { color:var(--text); }
-    .spotlight-team { font-size:13px; color:rgba(255,255,255,0.6); margin-top:2px; margin-bottom:12px; }
-    body.light .spotlight-team { color:var(--text-secondary); }
-    .spotlight-stats { display:flex; gap:20px; flex-wrap:wrap; }
-    .stat-block { text-align:center; }
-    .stat-val { font-size:22px; font-weight:700; color:var(--nba-gold); }
-    .stat-lbl { font-size:10px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.06em; }
-    body.light .stat-lbl { color:var(--text-muted); }
-    .spotlight-nav { display:flex; gap:6px; margin-top:12px; }
-    .spotlight-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .15s; }
-    body.light .spotlight-dot { background:var(--border-strong); }
-    .spotlight-dot.active { background:var(--nba-gold); }
+    .spotlight-card{background:linear-gradient(135deg,#1d428a 0%,#0d1117 100%);border:1px solid rgba(37,99,235,.3);border-radius:var(--card-radius);padding:16px;margin-bottom:1rem;position:relative;overflow:hidden}
+    body.light .spotlight-card{background:linear-gradient(135deg,#dbeafe,#f3f4f6);border-color:rgba(37,99,235,.2)}
+    body.ubt-mode .spotlight-card{background:linear-gradient(135deg,#1a1200,#0d1117);border-color:rgba(200,164,74,.3)}
+    .spotlight-label{font-size:10px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    body.light .spotlight-label{color:var(--text-muted)}
+    .spotlight-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .spotlight-img{width:76px;height:55px;object-fit:cover;object-position:top;border-radius:8px;flex-shrink:0;background:rgba(255,255,255,.05)}
+    .spotlight-name{font-size:19px;font-weight:700;color:#fff}
+    body.light .spotlight-name{color:var(--text)}
+    .spotlight-team{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;margin-bottom:10px}
+    body.light .spotlight-team{color:var(--text-secondary)}
+    .spotlight-stats{display:flex;gap:18px;flex-wrap:wrap}
+    .stat-block{text-align:center}
+    .stat-val{font-size:20px;font-weight:700;color:var(--nba-gold)}
+    .stat-lbl{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
+    body.light .stat-lbl{color:var(--text-muted)}
+    .spotlight-note{font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.5}
+    body.light .spotlight-note{color:var(--text-secondary)}
+    .spotlight-nav{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+    .spotlight-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:background .15s}
+    body.light .spotlight-dot{background:var(--border-strong)}
+    .spotlight-dot.active{background:var(--nba-gold)}
 
-    /* ── ROSTER ── */
-    .roster-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:8px; }
-    .player-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
-    .player-num { font-size:11px; color:var(--text-muted); }
-    .player-name { font-size:13px; font-weight:500; color:var(--text); margin-top:2px; }
-    .player-pos { font-size:11px; color:var(--text-secondary); }
-    .player-flag { font-size:14px; }
-
-    /* ── INFO BOX ── */
-    .info-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; font-size:12px; color:var(--text-secondary); margin-top:1rem; }
-    .info-box a { color:var(--accent-text); text-decoration:none; }
-
-    /* ── EMPTY ── */
-    .empty { text-align:center; padding:3rem 1rem; color:var(--text-secondary); }
-    .empty i { font-size:36px; color:var(--text-muted); margin-bottom:12px; display:block; }
-    .section-empty { padding:2rem; text-align:center; color:var(--text-secondary); font-size:13px; }
-
-    /* ── TOAST ── */
-    #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:#1e293b; color:#f1f5f9; font-size:13px; padding:10px 18px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); box-shadow:var(--shadow); transition:transform .25s; z-index:999; white-space:nowrap; pointer-events:none; }
-    #toast.show { transform:translateX(-50%) translateY(0); }
-    body.light #toast { background:#1e293b; }
-
-    .last-updated { font-size:12px; color:var(--text-muted); text-align:center; margin-top:2rem; }
-
-    /* ── HEADSHOTS ── */
-    .star-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); overflow:hidden; cursor:pointer; transition:border-color .15s, transform .15s; }
-    .star-card:hover { border-color:var(--accent); transform:translateY(-2px); }
-    .star-img-wrap { width:100%; aspect-ratio:260/190; background:linear-gradient(135deg,#1d428a 0%,#0d1117 100%); overflow:hidden; position:relative; }
-    body.light .star-img-wrap { background:linear-gradient(135deg,#dbeafe,#f3f4f6); }
-    .star-img { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
-    .star-img-err { display:none; }
-    .star-flag { position:absolute; top:6px; right:7px; font-size:18px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
-    .star-body { padding:10px 12px; }
-    .star-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.3; }
-    .star-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; margin-bottom:8px; }
-    .star-stats { display:flex; gap:12px; flex-wrap:wrap; }
-    .star-stat-val { font-size:15px; font-weight:600; color:var(--accent-text); }
-    .star-stat-lbl { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
-
-    /* Spotlight headshot */
-    .spotlight-img { width:80px; height:58px; object-fit:cover; object-position:top; border-radius:8px; flex-shrink:0; }
-    .spotlight-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+    /* ── STAR CARDS ── */
+    .star-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+    .star-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .star-img-wrap{width:100%;aspect-ratio:260/190;background:linear-gradient(135deg,#1d428a,#0d1117);overflow:hidden;position:relative}
+    body.light .star-img-wrap{background:linear-gradient(135deg,#dbeafe,#f3f4f6)}
+    .star-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+    .star-flag{position:absolute;top:6px;right:7px;font-size:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+    .star-body{padding:10px 12px}
+    .star-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+    .star-meta{font-size:11px;color:var(--text-secondary);margin-top:2px;margin-bottom:8px}
+    .star-stats{display:flex;gap:12px;flex-wrap:wrap}
+    .star-stat-val{font-size:15px;font-weight:600;color:var(--accent-text)}
+    .star-stat-lbl{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 
     /* ── NEWS ── */
-    .news-list { display:flex; flex-direction:column; gap:8px; }
-    .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:13px 15px; text-decoration:none; display:block; transition:border-color .15s; }
-    .news-card:hover { border-color:var(--accent); }
-    .news-title { font-size:14px; font-weight:500; color:var(--text); line-height:1.4; margin-bottom:5px; }
-    .news-meta  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .news-source { font-size:11px; font-weight:600; color:var(--accent-text); }
-    .news-date   { font-size:11px; color:var(--text-muted); }
-    .news-desc   { font-size:12px; color:var(--text-secondary); margin-top:5px; line-height:1.5; }
-    .news-error  { text-align:center; padding:2rem; color:var(--text-secondary); font-size:13px; }
+    .news-list{display:flex;flex-direction:column;gap:8px}
+    .news-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:13px 15px;text-decoration:none;display:block;transition:border-color .15s}
+    .news-card:hover{border-color:var(--accent)}
+    .news-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:5px}
+    .news-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .news-source{font-size:11px;font-weight:600;color:var(--accent-text)}
+    .news-date{font-size:11px;color:var(--text-muted)}
+    .news-desc{font-size:12px;color:var(--text-secondary);margin-top:5px;line-height:1.5}
 
-    @media (max-width:480px) {
-      .app { padding:1rem .75rem 4rem; }
-      .matchup { font-size:13px; }
-      .tab { padding:7px 10px; font-size:12px; }
-      .spotlight-stats { gap:14px; }
-      .stat-val { font-size:18px; }
+    /* ── WEEK VIEW ── */
+    .week-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:1rem;scrollbar-width:none}
+    .week-scroll::-webkit-scrollbar{display:none}
+    .week-day{flex-shrink:0;width:64px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;transition:all .15s}
+    .week-day.today{border-color:var(--accent);background:var(--accent-bg)}
+    .week-day.has-game{border-color:var(--border-strong)}
+    .week-day-name{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+    .week-day-num{font-size:16px;font-weight:600;color:var(--text);margin:2px 0}
+    .week-dots{display:flex;gap:3px;justify-content:center;min-height:8px;margin-top:3px}
+    .week-dot{width:6px;height:6px;border-radius:50%}
+    .week-dot.nba{background:var(--nba-gold)}
+    .week-dot.fiba{background:#4ade80}
+    .week-dot.ubt{background:var(--nba-blue)}
+
+    /* ── PREDICTION GAME ── */
+    .pred-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px;margin-bottom:8px}
+    .pred-matchup{font-size:14px;font-weight:500;color:var(--text);margin-bottom:10px}
+    .pred-btns{display:flex;gap:8px}
+    .pred-btn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border-strong);background:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:all .15s;text-align:center}
+    .pred-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent-text);background:var(--accent-bg)}
+    .pred-btn.picked-win{background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80}
+    .pred-btn.picked-loss{background:rgba(239,68,68,.1);border-color:#ef4444;color:#ef4444}
+    .pred-btn.correct{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80}
+    .pred-btn.wrong{background:rgba(239,68,68,.15);border-color:#ef4444;color:var(--text-muted);opacity:.7}
+    .pred-btn:disabled{cursor:default}
+    .pred-result{font-size:12px;margin-top:8px;color:var(--text-secondary)}
+    .pred-score-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px;margin-bottom:1rem;display:flex;align-items:center;gap:16px}
+    .pred-score-num{font-size:28px;font-weight:700;color:var(--accent-text)}
+    .pred-score-label{font-size:12px;color:var(--text-secondary)}
+
+    /* ── COMPARISON ── */
+    .compare-wrap{overflow-x:auto}
+    .compare-table{width:100%;border-collapse:collapse;font-size:13px}
+    .compare-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:600;color:var(--text)}
+    .compare-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+    .compare-table tr:last-child td{border-bottom:none}
+    .compare-table .highlight{color:var(--accent-text);font-weight:600}
+    .compare-pick{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+    .compare-select{flex:1;min-width:160px;padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;cursor:pointer}
+
+    /* ── ROSTER ── */
+    .roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+    .player-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .player-num{font-size:11px;color:var(--text-muted)}
+    .player-name{font-size:13px;font-weight:500;color:var(--text);margin-top:2px}
+    .player-pos{font-size:11px;color:var(--text-secondary)}
+
+    /* ── INFO BOX ── */
+    .info-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--text-secondary);margin-top:1rem}
+    .info-box a{color:var(--accent-text);text-decoration:none}
+
+    /* ── MISC ── */
+    .section-empty{padding:2rem;text-align:center;color:var(--text-secondary);font-size:13px}
+    .empty{text-align:center;padding:3rem 1rem;color:var(--text-secondary)}
+    .empty i{font-size:36px;color:var(--text-muted);margin-bottom:12px;display:block}
+    .last-updated{font-size:12px;color:var(--text-muted);text-align:center;margin-top:2rem}
+
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#1e293b;color:#f1f5f9;font-size:13px;padding:10px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);transition:transform .25s;z-index:999;white-space:nowrap;pointer-events:none}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ── MORNING MODAL ── */
+    #morning-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+    #morning-modal.open{display:flex}
+    .morning-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto}
+    .morning-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .morning-sub{font-size:13px;color:var(--text-secondary);margin-bottom:16px}
+    .morning-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+    .morning-item-label{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .morning-item-main{font-size:15px;font-weight:600;color:var(--text)}
+    .morning-item-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
+    .morning-close{width:100%;margin-top:12px;padding:10px;border-radius:var(--radius);border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+
+    @media(max-width:480px){
+      .app{padding:1rem .75rem 4rem}
+      .matchup{font-size:13px}
+      .tab{padding:6px 9px;font-size:11px}
+      .spotlight-stats{gap:12px}
+      .stat-val{font-size:17px}
     }
   </style>
 </head>
 <body>
 <div class="app">
+
+  <!-- NOW BANNER -->
+  <div id="now-banner" class="idle" onclick="handleNowClick()">
+    <div class="now-icon">🏀</div>
+    <div class="now-main">
+      <div class="now-label">Loading…</div>
+      <div class="now-title" id="now-title">Basketball Tracker</div>
+      <div class="now-sub" id="now-sub">Checking schedule…</div>
+    </div>
+    <div class="now-right" id="now-right"></div>
+  </div>
 
   <!-- HEADER -->
   <div class="header">
@@ -239,18 +301,16 @@
       <div class="logo"><i class="ti ti-ball-basketball"></i></div>
       <div>
         <div class="app-title">Basketball Tracker</div>
-        <div class="app-sub">NBA · FIBA · U-BT Cluj · Romania time</div>
+        <div class="app-sub">NBA · FIBA · U-BT Cluj · Romania</div>
       </div>
     </div>
     <div class="header-right">
-      <div class="tz-badge"><i class="ti ti-clock" style="font-size:13px;"></i><span id="ro-clock">--:--</span> EET</div>
-      <div class="tz-badge" style="font-size:11px;gap:4px;"><span id="live-status" style="color:var(--text-muted);">Loading…</span></div>
-      <button class="icon-btn" id="spoiler-toggle-btn" onclick="toggleSpoilers()" title="Toggle score spoilers">
-        <i class="ti ti-eye" id="spoiler-icon"></i>
-      </button>
-      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">
-        <i class="ti ti-sun" id="theme-icon"></i>
-      </button>
+      <div class="tz-badge"><i class="ti ti-clock" style="font-size:12px"></i><span id="ro-clock">--:--</span></div>
+      <div class="tz-badge" style="font-size:11px"><span id="live-status" style="color:var(--text-muted)">…</span></div>
+      <button class="icon-btn" id="morning-btn" onclick="openMorning()" title="What did I miss?"><i class="ti ti-coffee"></i></button>
+      <button class="icon-btn" id="ubt-btn" onclick="toggleUBTMode()" title="U-BT fan mode"><span style="font-size:13px">🏟</span></button>
+      <button class="icon-btn" id="spoiler-btn" onclick="toggleSpoilers()" title="Hide scores"><i class="ti ti-eye" id="spoiler-icon"></i></button>
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Light/dark"><i class="ti ti-sun" id="theme-icon"></i></button>
       <button class="icon-btn" onclick="loadData()"><i class="ti ti-refresh"></i></button>
     </div>
   </div>
@@ -259,15 +319,18 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('schedule',this)">Schedule</button>
     <button class="tab" onclick="switchTab('scores',this)">Live & Scores</button>
+    <button class="tab" onclick="switchTab('week',this)">📅 Week</button>
     <button class="tab" onclick="switchTab('bracket',this)">Bracket</button>
     <button class="tab" onclick="switchTab('standings',this)">Standings</button>
+    <button class="tab" onclick="switchTab('predict',this)">🎯 Predict</button>
     <button class="tab" onclick="switchTab('ubt',this)">U-BT Cluj</button>
     <button class="tab" onclick="switchTab('romania',this)">🇷🇴 Romania</button>
     <button class="tab" onclick="switchTab('stars',this)">Stars</button>
+    <button class="tab" onclick="switchTab('compare',this)">Compare</button>
     <button class="tab" onclick="switchTab('news',this)">📰 News</button>
   </div>
 
-  <!-- SCHEDULE TAB -->
+  <!-- SCHEDULE -->
   <div id="tab-schedule">
     <div class="filters">
       <button class="filter-btn active" onclick="filterLeague('all',this)">All</button>
@@ -277,15 +340,21 @@
     <div id="schedule-list" class="games-list"><div class="section-empty">Loading…</div></div>
   </div>
 
-  <!-- SCORES TAB -->
-  <div id="tab-scores" style="display:none;">
+  <!-- SCORES -->
+  <div id="tab-scores" style="display:none">
     <div id="scores-list" class="scores-view"><div class="section-empty">Loading…</div></div>
   </div>
 
-  <!-- BRACKET TAB -->
-  <div id="tab-bracket" style="display:none;">
-    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem;">2026 NBA Playoffs — Conference Semifinals</div>
-    <div style="margin-bottom:1.25rem;">
+  <!-- WEEK VIEW -->
+  <div id="tab-week" style="display:none">
+    <div class="week-scroll" id="week-strip"></div>
+    <div id="week-games" class="games-list"></div>
+  </div>
+
+  <!-- BRACKET -->
+  <div id="tab-bracket" style="display:none">
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem">2026 NBA Playoffs — Conference Semifinals</div>
+    <div style="margin-bottom:1.25rem">
       <div class="day-label">Western Conference</div>
       <div class="bracket-wrap"><div id="bracket-west" class="bracket"></div></div>
     </div>
@@ -295,413 +364,318 @@
     </div>
   </div>
 
-  <!-- STANDINGS TAB -->
-  <div id="tab-standings" style="display:none;">
+  <!-- STANDINGS -->
+  <div id="tab-standings" style="display:none">
     <div class="filters">
       <button class="filter-btn active" onclick="filterConf('East',this)">Eastern</button>
       <button class="filter-btn" onclick="filterConf('West',this)">Western</button>
     </div>
     <div id="standings-table" class="standings-wrap"></div>
-    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);padding:0 4px;">Ranks 1–8 = Playoff · 9–10 = Play-In</div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);padding:0 4px">Ranks 1–8 = Playoff · 9–10 = Play-In</div>
   </div>
 
-  <!-- U-BT TAB -->
-  <div id="tab-ubt" style="display:none;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
-      <div class="league-badge ubt" style="width:44px;height:44px;font-size:10px;">U-BT</div>
-      <div style="flex:1;">
-        <div style="font-size:15px;font-weight:600;">U-BT Cluj-Napoca</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">CS U-Mobitelco · BTarena · 10,000 seats</div>
-        <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
-          <span class="tv-tag eurocup"><i class="ti ti-trophy" style="font-size:10px;"></i>EuroCup</span>
-          <span class="tv-tag abaliga"><i class="ti ti-trophy" style="font-size:10px;"></i>Liga ABA</span>
-          <span class="tv-tag digi"><i class="ti ti-trophy" style="font-size:10px;"></i>LNBM</span>
+  <!-- PREDICT -->
+  <div id="tab-predict" style="display:none">
+    <div class="pred-score-bar">
+      <div><div class="pred-score-num" id="pred-correct">0</div><div class="pred-score-label">Correct</div></div>
+      <div style="height:40px;width:1px;background:var(--border)"></div>
+      <div><div class="pred-score-num" id="pred-total" style="color:var(--text-secondary)">0</div><div class="pred-score-label">Predicted</div></div>
+      <div style="height:40px;width:1px;background:var(--border)"></div>
+      <div><div class="pred-score-num" id="pred-pct" style="color:var(--nba-gold)">—</div><div class="pred-score-label">Accuracy</div></div>
+    </div>
+    <div id="predict-list"><div class="section-empty">Loading upcoming games…</div></div>
+  </div>
+
+  <!-- U-BT -->
+  <div id="tab-ubt" style="display:none">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+      <div class="league-badge ubt" style="width:44px;height:44px;font-size:10px">U-BT</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:600">U-BT Cluj-Napoca</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">CS U-Mobitelco · BTarena · 10,000 seats</div>
+        <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
+          <span class="tv-tag eurocup"><i class="ti ti-trophy" style="font-size:10px"></i>EuroCup</span>
+          <span class="tv-tag abaliga"><i class="ti ti-trophy" style="font-size:10px"></i>Liga ABA</span>
+          <span class="tv-tag digi"><i class="ti ti-trophy" style="font-size:10px"></i>LNBM</span>
         </div>
       </div>
-      <div style="text-align:right;font-size:12px;color:var(--text-secondary);">
-        <div style="font-size:18px;font-weight:700;color:var(--nba-gold);">7×</div>
-        <div>Liga Nat. titles</div>
+      <div style="text-align:right;font-size:12px;color:var(--text-secondary)">
+        <div style="font-size:18px;font-weight:700;color:var(--nba-gold)">7×</div><div>Liga Nat.</div>
       </div>
     </div>
     <div id="ubt-games-list" class="games-list"></div>
-    <div class="day-label" style="margin-top:1.25rem;">2025-26 Roster</div>
-    <div id="ubt-roster" class="roster-grid" style="margin-top:8px;"></div>
+    <div class="day-label" style="margin-top:1.25rem">2025-26 Roster</div>
+    <div id="ubt-roster" class="roster-grid" style="margin-top:8px"></div>
     <div class="info-box">
-      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
-      Season runs <strong>October – May</strong>. New fixtures published September 2026.
-      Live scores: <a href="https://www.aba-liga.com/team/100/25/1/0/u-bt-cluj-napoca/" target="_blank">ABA Liga</a> ·
+      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>
+      Season <strong>October – May</strong>. New fixtures September 2026.
+      <a href="https://www.aba-liga.com/team/100/25/1/0/u-bt-cluj-napoca/" target="_blank">ABA Liga</a> ·
       <a href="https://www.sofascore.com/basketball/team/u-banca-transilvania-cluj-napoca/59003" target="_blank">Sofascore</a>
     </div>
   </div>
 
-  <!-- ROMANIA TAB -->
-  <div id="tab-romania" style="display:none;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
-      <div class="league-badge ro" style="width:44px;height:44px;font-size:18px;">🇷🇴</div>
+  <!-- ROMANIA -->
+  <div id="tab-romania" style="display:none">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+      <div class="league-badge ro" style="width:44px;height:44px;font-size:18px">🇷🇴</div>
       <div>
-        <div style="font-size:15px;font-weight:600;">Romania Men's National Team</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">FIBA EuroBasket 2027 Qualifiers</div>
-        <span class="tv-tag tvr" style="margin-top:6px;display:inline-flex;"><i class="ti ti-device-tv" style="font-size:10px;"></i>TVR Sport (free)</span>
+        <div style="font-size:15px;font-weight:600">Romania Men's National Team</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">FIBA EuroBasket 2027 Qualifiers</div>
+        <span class="tv-tag tvr" style="margin-top:6px;display:inline-flex"><i class="ti ti-device-tv" style="font-size:10px"></i>TVR Sport (free)</span>
       </div>
     </div>
     <div id="romania-games" class="games-list"></div>
     <div class="info-box">
-      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
-      Romania's national team competes in <strong>FIBA EuroBasket 2027 Qualifiers</strong>. Games involving the Romanian national team are broadcast free on <strong>TVR Sport</strong> per the EBU-FIBA broadcast agreement. Follow at <a href="https://www.fiba.basketball/eurobasket/2027/qualifiers" target="_blank">FIBA.basketball</a>.
+      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>
+      Broadcast free on <strong>TVR Sport</strong> (EBU-FIBA agreement).
+      <a href="https://www.fiba.basketball/eurobasket/2027/qualifiers" target="_blank">FIBA.basketball</a>
     </div>
   </div>
 
-  <!-- STARS TAB -->
-  <div id="tab-stars" style="display:none;">
+  <!-- STARS -->
+  <div id="tab-stars" style="display:none">
     <div id="spotlight-card" class="spotlight-card"></div>
-
-    <div class="day-label" style="margin-top:1.25rem;">NBA Stars</div>
-    <div id="stars-nba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
-
-    <div class="day-label" style="margin-top:1.5rem;">FIBA Stars to Watch</div>
-    <div id="stars-fiba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
-
-    <div class="day-label" style="margin-top:1.5rem;">U-BT Cluj Key Players</div>
-    <div id="stars-ubt" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
+    <div class="day-label" style="margin-top:1.25rem">NBA Stars</div>
+    <div id="stars-nba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px"></div>
+    <div class="day-label" style="margin-top:1.5rem">FIBA Stars to Watch</div>
+    <div id="stars-fiba" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px"></div>
+    <div class="day-label" style="margin-top:1.5rem">U-BT Cluj Key Players</div>
+    <div id="stars-ubt" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px"></div>
   </div>
 
-  <!-- NEWS TAB -->
-  <div id="tab-news" style="display:none;">
+  <!-- COMPARE -->
+  <div id="tab-compare" style="display:none">
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem">Pick two players to compare side by side</div>
+    <div class="compare-pick">
+      <select class="compare-select" id="compare-a" onchange="renderCompare()"></select>
+      <select class="compare-select" id="compare-b" onchange="renderCompare()"></select>
+    </div>
+    <div class="compare-wrap" id="compare-table"></div>
+  </div>
+
+  <!-- NEWS -->
+  <div id="tab-news" style="display:none">
     <div class="filters">
       <button class="filter-btn active" onclick="switchNews('nba',this)">NBA</button>
       <button class="filter-btn" onclick="switchNews('fiba',this)">FIBA / Europe</button>
       <button class="filter-btn" onclick="switchNews('ubt',this)">U-BT & Romania</button>
     </div>
-    <div id="news-nba"  class="news-list"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
-    <div id="news-fiba" class="news-list" style="display:none;"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
-    <div id="news-ubt"  class="news-list" style="display:none;"><div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;"></i>Loading news…</div></div>
+    <div id="news-nba" class="news-list"><div class="section-empty">Loading…</div></div>
+    <div id="news-fiba" class="news-list" style="display:none"><div class="section-empty">Loading…</div></div>
+    <div id="news-ubt" class="news-list" style="display:none"><div class="section-empty">Loading…</div></div>
   </div>
 
   <div class="last-updated" id="last-updated"></div>
 </div>
 
+<!-- MORNING MODAL -->
+<div id="morning-modal">
+  <div class="morning-box">
+    <div class="morning-title">☀️ What did you miss?</div>
+    <div class="morning-sub" id="morning-date"></div>
+    <div id="morning-content"></div>
+    <button class="morning-close" onclick="closeMorning()">Close</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ── TIMEZONE ──────────────────────────────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const WORKER_URL = 'https://jolly-cherry-b8c7.mrsn123andrei.workers.dev';
 const RO_TZ = 'Europe/Bucharest';
-function toRO(d) { return new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',hour12:false}); }
-function toRODate(d) { return new Date(d).toLocaleDateString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short'}); }
-function toROFull(d) { return new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}); }
-function clockTick() {
-  document.getElementById('ro-clock').textContent =
+
+// ── TIME HELPERS ──────────────────────────────────────────────────────────
+const toRO     = d => new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',hour12:false});
+const toRODate = d => new Date(d).toLocaleDateString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short'});
+const toROFull = d => new Date(d).toLocaleString('en-GB',{timeZone:RO_TZ,weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false});
+const todayRO  = () => new Date().toLocaleDateString('en-CA',{timeZone:RO_TZ});
+
+function countdown(isoTime) {
+  const diff = new Date(isoTime)-Date.now();
+  if(diff<=0) return null;
+  const h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000);
+  if(h>48){return `in ${Math.floor(h/24)}d`}
+  if(h>0) return `in ${h}h ${m}m`;
+  return `in ${m}m`;
+}
+function timeAgo(iso){
+  const diff=Date.now()-new Date(iso);
+  const h=Math.floor(diff/3600000),d=Math.floor(h/24);
+  if(h<1)return 'just now';
+  if(h<24)return `${h}h ago`;
+  if(d<7)return `${d}d ago`;
+  return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+function updateCountdowns(){
+  document.querySelectorAll('[data-countdown]').forEach(el=>{
+    const cd=countdown(el.dataset.countdown);
+    el.textContent=cd||'';
+  });
+}
+setInterval(updateCountdowns,30000);
+function clockTick(){
+  document.getElementById('ro-clock').textContent=
     new Date().toLocaleTimeString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',hour12:false});
 }
 setInterval(clockTick,1000); clockTick();
-
-// live countdown
-function countdown(isoTime) {
-  const diff = new Date(isoTime) - Date.now();
-  if (diff <= 0) return null;
-  const h = Math.floor(diff/3600000);
-  const m = Math.floor((diff%3600000)/60000);
-  if (h > 48) { const d=Math.floor(h/24); return `in ${d}d`; }
-  if (h > 0) return `in ${h}h ${m}m`;
-  return `in ${m}m`;
-}
-function updateCountdowns() {
-  document.querySelectorAll('[data-countdown]').forEach(el => {
-    const cd = countdown(el.dataset.countdown);
-    el.textContent = cd || '';
-  });
-}
-setInterval(updateCountdowns, 30000);
-
-// page title live indicator
-function updateTitle() {
-  const live = GAMES.filter(g=>g.status==='live');
-  document.title = live.length ? `🔴 LIVE — Basketball Tracker` : '🏀 Basketball Tracker — Romania';
+function updateTitle(){
+  const live=GAMES.filter(g=>g.status==='live');
+  document.title=live.length?`🔴 LIVE — Basketball Tracker`:`🏀 Basketball Tracker — Romania`;
 }
 
 // ── THEME ─────────────────────────────────────────────────────────────────
-let isDark = localStorage.getItem('bkt-theme') !== 'light';
-function applyTheme() {
-  document.body.classList.toggle('light', !isDark);
-  document.getElementById('theme-icon').className = isDark ? 'ti ti-sun' : 'ti ti-moon';
-  document.getElementById('theme-meta').content = isDark ? '#0d1117' : '#f3f4f6';
+let isDark=localStorage.getItem('bkt-theme')!=='light';
+function applyTheme(){
+  document.body.classList.toggle('light',!isDark);
+  document.getElementById('theme-icon').className=isDark?'ti ti-sun':'ti ti-moon';
+  document.getElementById('theme-meta').content=isDark?'#0d1117':'#f3f4f6';
 }
-function toggleTheme() { isDark=!isDark; localStorage.setItem('bkt-theme', isDark?'dark':'light'); applyTheme(); }
+function toggleTheme(){isDark=!isDark;localStorage.setItem('bkt-theme',isDark?'dark':'light');applyTheme();}
 applyTheme();
 
 // ── SPOILERS ──────────────────────────────────────────────────────────────
-let spoilersHidden = localStorage.getItem('bkt-spoilers') === 'true';
-function applySpoilers() {
-  document.querySelectorAll('.spoiler-wrap').forEach(w => w.classList.toggle('spoiler-hidden', spoilersHidden));
-  document.getElementById('spoiler-icon').className = spoilersHidden ? 'ti ti-eye-off' : 'ti ti-eye';
-  document.getElementById('spoiler-toggle-btn').classList.toggle('active', spoilersHidden);
+let spoilersHidden=localStorage.getItem('bkt-spoilers')==='true';
+function applySpoilers(){
+  document.querySelectorAll('.spoiler-wrap').forEach(w=>w.classList.toggle('spoiler-hidden',spoilersHidden));
+  document.getElementById('spoiler-icon').className=spoilersHidden?'ti ti-eye-off':'ti ti-eye';
+  document.getElementById('spoiler-btn').classList.toggle('active',spoilersHidden);
 }
-function toggleSpoilers() { spoilersHidden=!spoilersHidden; localStorage.setItem('bkt-spoilers', spoilersHidden); renderSchedule(); renderScores(); renderUBT(); applySpoilers(); }
+function toggleSpoilers(){spoilersHidden=!spoilersHidden;localStorage.setItem('bkt-spoilers',spoilersHidden);renderSchedule();renderScores();renderUBT();applySpoilers();}
 
-// ── REMINDERS ─────────────────────────────────────────────────────────────
-let reminders = JSON.parse(localStorage.getItem('bkt-reminders') || '{}');
-function saveReminders() { localStorage.setItem('bkt-reminders', JSON.stringify(reminders)); }
+// ── UBT FAN MODE ──────────────────────────────────────────────────────────
+let ubtMode=localStorage.getItem('bkt-ubt')==='true';
+function applyUBTMode(){
+  document.body.classList.toggle('ubt-mode',ubtMode);
+  document.getElementById('ubt-btn').classList.toggle('ubt-active',ubtMode);
+  document.querySelectorAll('.game-card').forEach(c=>{
+    const m=c.querySelector('.matchup');
+    if(m&&m.textContent.includes('U-BT')) c.classList.toggle('ubt-highlighted',ubtMode);
+  });
+}
+function toggleUBTMode(){ubtMode=!ubtMode;localStorage.setItem('bkt-ubt',ubtMode);applyUBTMode();toast(ubtMode?'🏟 U-BT Fan Mode ON':'Fan mode off');}
 
-async function toggleReminder(gameId, gameTime, label) {
-  if (reminders[gameId]) {
-    delete reminders[gameId];
-    saveReminders();
-    toast('Reminder removed');
-    renderSchedule(); renderUBT(); renderRomania();
-    return;
-  }
-  if (!('Notification' in window)) { toast('Notifications not supported in this browser'); return; }
-  let perm = Notification.permission;
-  if (perm === 'default') perm = await Notification.requestPermission();
-  if (perm !== 'granted') { toast('Please allow notifications in browser settings'); return; }
-  reminders[gameId] = { time: gameTime, label };
+// ── REMINDERS ────────────────────────────────────────────────────────────
+let reminders=JSON.parse(localStorage.getItem('bkt-reminders')||'{}');
+function saveReminders(){localStorage.setItem('bkt-reminders',JSON.stringify(reminders));}
+async function toggleReminder(gameId,gameTime,label){
+  if(reminders[gameId]){delete reminders[gameId];saveReminders();toast('Reminder removed');renderSchedule();renderUBT();renderRomania();return;}
+  if(!('Notification'in window)){toast('Notifications not supported');return;}
+  let perm=Notification.permission;
+  if(perm==='default')perm=await Notification.requestPermission();
+  if(perm!=='granted'){toast('Allow notifications in browser settings');return;}
+  reminders[gameId]={time:gameTime,label};
   saveReminders();
-  toast('⏰ Reminder set for ' + toRO(gameTime) + ' RO time');
-  renderSchedule(); renderUBT(); renderRomania();
-  scheduleReminder(gameId, gameTime, label);
+  toast('⏰ Reminder set — '+toRO(gameTime)+' RO time');
+  renderSchedule();renderUBT();renderRomania();
+  scheduleReminder(gameId,gameTime,label);
 }
-
-function scheduleReminder(gameId, gameTime, label) {
-  const msUntil = new Date(gameTime) - Date.now() - 30*60*1000; // 30min before
-  if (msUntil < 0) return;
-  setTimeout(() => {
-    if (!reminders[gameId]) return;
-    new Notification('🏀 Game starting in 30 min!', {
-      body: label + ' · ' + toRO(gameTime) + ' RO time',
-      icon: 'https://cdn.jsdelivr.net/npm/@tabler/icons/icons/ball-basketball.svg'
-    });
-  }, msUntil);
+function scheduleReminder(gameId,gameTime,label){
+  const ms=new Date(gameTime)-Date.now()-30*60*1000;
+  if(ms<0)return;
+  setTimeout(()=>{
+    if(!reminders[gameId])return;
+    new Notification('🏀 Starting in 30 min!',{body:label+' · '+toRO(gameTime)+' RO time'});
+  },ms);
 }
+function initReminders(){Object.entries(reminders).forEach(([id,r])=>scheduleReminder(id,r.time,r.label));}
 
-// fire any stored reminders on page load
-function initReminders() {
-  Object.entries(reminders).forEach(([id,r]) => scheduleReminder(id, r.time, r.label));
-}
-
-// register service worker for background notifications
-function registerSW() {
-  if (!('serviceWorker' in navigator)) return;
-  const swCode = `
-self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SCHEDULE_NOTIF') {
-    const { delay, title, body } = e.data;
-    setTimeout(() => {
-      self.registration.showNotification(title, { body, icon: '/icon-192.png', badge: '/icon-192.png' });
-    }, delay);
+// ── SHARE ────────────────────────────────────────────────────────────────
+function shareGame(g){
+  const tv=g.tv?` · ${g.tv}`:'';
+  const text=`🏀 ${g.away} @ ${g.home}\n🕐 ${toRO(g.time)} RO time · ${toRODate(g.time)}${tv}\n${g.round}`;
+  if(navigator.share){navigator.share({text});}
+  else{
+    const wa=`https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(wa,'_blank');
   }
-});
-`;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const url = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url).catch(()=>{});
+  toast('Opening WhatsApp…');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────
-let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+// ── LIVE STATUS ──────────────────────────────────────────────────────────
+function setLiveStatus(state,fetchedAt,note){
+  const el=document.getElementById('live-status');
+  if(!el)return;
+  if(state==='fetching')   {el.textContent='⟳';el.style.color='var(--text-muted)';}
+  else if(state==='ok')    {el.textContent='● '+(note||('updated '+toRO(fetchedAt)));el.style.color='#4ade80';}
+  else if(state==='offseason'){el.textContent='○ Off-season';el.style.color='var(--text-muted)';}
+  else                     {el.textContent='○ offline';el.style.color='var(--live-red)';}
 }
 
-// ── DATA ──────────────────────────────────────────────────────────────────
-// !! IMPORTANT: after deploying your Cloudflare Worker, paste its URL below !!
-// Example: 'https://basketball-proxy.YOUR-NAME.workers.dev'
-// Until configured, the tracker uses the fallback static data below.
-const WORKER_URL = 'https://jolly-cherry-b8c7.mrsn123andrei.workers.dev';
+// ── DATA ─────────────────────────────────────────────────────────────────
+const NBA_IMG  = id=>`https://cdn.nba.com/headshots/nba/latest/260x190/${id}.png`;
+const AVATAR   = (name,color='1d428a')=>`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color}&color=fff&size=260&bold=true`;
 
-// Live NBA games fetched from Worker — populated by fetchLiveNBA()
-let GAMES = [];
-
-// Fallback static NBA data shown before Worker is configured or if fetch fails
-const FALLBACK_NBA_GAMES = [
-  { id:'nba-1', league:'NBA', home:'Oklahoma City Thunder', away:'San Antonio Spurs', time:'2026-08-17T20:00:00-05:00', venue:'Paycom Center', round:'Playoffs R2 G4', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
-  { id:'nba-2', league:'NBA', home:'Boston Celtics', away:'New York Knicks', time:'2026-08-17T22:30:00-05:00', venue:'TD Garden', round:'Playoffs R2 G5', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
-  { id:'nba-3', league:'NBA', home:'Denver Nuggets', away:'Los Angeles Lakers', time:'2026-08-18T19:00:00-06:00', venue:'Ball Arena', round:'Playoffs R2 G4', status:'upcoming', tv:'AntenaPLAY', tvClass:'antenaplay' },
-  { id:'nba-live-1', league:'NBA', home:'Detroit Pistons', away:'Cleveland Cavaliers', time:'2026-08-16T19:00:00-05:00', venue:'Little Caesars Arena', round:'Playoffs R2 G3', status:'live', homeScore:67, awayScore:71, quarter:'Q3 8:24', tv:'AntenaPLAY', tvClass:'antenaplay' },
-  { id:'nba-f1', league:'NBA', home:'Houston Rockets', away:'Minnesota Timberwolves', time:'2026-08-15T20:00:00-05:00', venue:'Toyota Center', round:'Playoffs R2 G2', status:'final', homeScore:104, awayScore:98, tv:'AntenaPLAY', tvClass:'antenaplay' },
+let GAMES=[];
+const FALLBACK_NBA=[
+  {id:'nba-1',league:'NBA',home:'Oklahoma City Thunder',away:'San Antonio Spurs',time:'2026-08-17T20:00:00-05:00',venue:'Paycom Center',round:'Playoffs R2 G4',status:'upcoming',tv:'AntenaPLAY',tvClass:'antenaplay'},
+  {id:'nba-2',league:'NBA',home:'Boston Celtics',away:'New York Knicks',time:'2026-08-17T22:30:00-05:00',venue:'TD Garden',round:'Playoffs R2 G5',status:'upcoming',tv:'AntenaPLAY',tvClass:'antenaplay'},
+  {id:'nba-3',league:'NBA',home:'Denver Nuggets',away:'Los Angeles Lakers',time:'2026-08-18T19:00:00-06:00',venue:'Ball Arena',round:'Playoffs R2 G4',status:'upcoming',tv:'AntenaPLAY',tvClass:'antenaplay'},
+  {id:'nba-live-1',league:'NBA',home:'Detroit Pistons',away:'Cleveland Cavaliers',time:'2026-08-16T19:00:00-05:00',venue:'Little Caesars Arena',round:'Playoffs R2 G3',status:'live',homeScore:67,awayScore:71,quarter:'Q3 8:24',tv:'AntenaPLAY',tvClass:'antenaplay'},
+  {id:'nba-f1',league:'NBA',home:'Houston Rockets',away:'Minnesota Timberwolves',time:'2026-08-15T20:00:00-05:00',venue:'Toyota Center',round:'Playoffs R2 G2',status:'final',homeScore:104,awayScore:98,tv:'AntenaPLAY',tvClass:'antenaplay'},
 ];
-
-// FIBA games are always static (no free live API)
-const FIBA_GAMES = [
-  { id:'fiba-1', league:'FIBA', home:'Spain', away:'France', time:'2026-08-17T14:00:00+02:00', venue:'Palau Sant Jordi, Barcelona', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
-  { id:'fiba-2', league:'FIBA', home:'Serbia', away:'Greece', time:'2026-08-17T17:00:00+02:00', venue:'Stark Arena, Belgrade', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
-  { id:'fiba-3', league:'FIBA', home:'Slovenia', away:'Lithuania', time:'2026-08-18T20:30:00+02:00', venue:'Stožice Arena, Ljubljana', round:'EuroBasket 2026 QF', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
-  { id:'fiba-f1', league:'FIBA', home:'Germany', away:'Turkey', time:'2026-08-16T17:00:00+02:00', venue:'SAP Arena, Mannheim', round:'EuroBasket 2026 QF', status:'final', homeScore:89, awayScore:76, tv:'TVR Sport', tvClass:'tvr' },
-  { id:'fiba-f2', league:'FIBA', home:'France', away:'Latvia', time:'2026-08-15T19:00:00+02:00', venue:'Accor Arena, Paris', round:'EuroBasket 2026 Group', status:'final', homeScore:81, awayScore:70, tv:'TVR Sport', tvClass:'tvr' },
+const FIBA_GAMES=[
+  {id:'fiba-1',league:'FIBA',home:'Spain',away:'France',time:'2026-08-17T14:00:00+02:00',venue:'Palau Sant Jordi, Barcelona',round:'EuroBasket 2026 QF',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
+  {id:'fiba-2',league:'FIBA',home:'Serbia',away:'Greece',time:'2026-08-17T17:00:00+02:00',venue:'Stark Arena, Belgrade',round:'EuroBasket 2026 QF',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
+  {id:'fiba-3',league:'FIBA',home:'Slovenia',away:'Lithuania',time:'2026-08-18T20:30:00+02:00',venue:'Stožice Arena, Ljubljana',round:'EuroBasket 2026 QF',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
+  {id:'fiba-f1',league:'FIBA',home:'Germany',away:'Turkey',time:'2026-08-16T17:00:00+02:00',venue:'SAP Arena, Mannheim',round:'EuroBasket 2026 QF',status:'final',homeScore:89,awayScore:76,tv:'TVR Sport',tvClass:'tvr'},
+  {id:'fiba-f2',league:'FIBA',home:'France',away:'Latvia',time:'2026-08-15T19:00:00+02:00',venue:'Accor Arena, Paris',round:'EuroBasket 2026 Group',status:'final',homeScore:81,awayScore:70,tv:'TVR Sport',tvClass:'tvr'},
 ];
-
-// Convert a Worker game object → tracker game shape
-function workerGameToLocal(g) {
-  const periodLabel = g.period > 0 ? `Q${g.period}` : '';
-  const clockLabel  = g.clock ? g.clock.replace('PT','').replace('M',':').replace('S','').replace(/\..*$/,'') : '';
-  const quarter     = g.status==='live' ? (periodLabel + (clockLabel?' '+clockLabel:'')).trim() : '';
-  const id          = 'nba-live-'+g.id;
-  return {
-    id,
-    league:    'NBA',
-    home:      g.home.name,
-    away:      g.away.name,
-    time:      g.startTimeUTC,
-    venue:     g.arena ?? '',
-    round:     g.series || 'NBA 2025-26',
-    status:    g.status,
-    homeScore: g.home.score,
-    awayScore: g.away.score,
-    quarter,
-    tv:        'AntenaPLAY',
-    tvClass:   'antenaplay',
-  };
-}
-
-// Live fetch — called on load and every 60s
-let fetchInProgress = false;
-async function fetchLiveNBA() {
-  if (fetchInProgress) return;
-  fetchInProgress = true;
-  setLiveStatus('fetching');
-  try {
-    const res = await fetch(WORKER_URL + '/nba/scoreboard', { signal: AbortSignal.timeout(10000) });
-    if (!res.ok) throw new Error('Worker returned ' + res.status);
-    const data = await res.json();
-
-    if (data.offSeason) {
-      // Clean off-season response — show fallback NBA games + off-season banner
-      GAMES = [...FALLBACK_NBA_GAMES, ...FIBA_GAMES];
-      setLiveStatus('offseason');
-      showOffSeasonBanner(data.nextSeasonStart);
-      return;
-    }
-
-    if (data.source === 'error' || !data.games) {
-      throw new Error(data.message || 'Worker error');
-    }
-
-    const liveGames = (data.games ?? []).map(workerGameToLocal);
-
-    if (liveGames.length === 0) {
-      // In-season but no games today — keep FIBA, drop NBA fallback
-      GAMES = [...FIBA_GAMES];
-      setLiveStatus('ok', data.fetchedAt, 'No NBA games today');
-    } else {
-      GAMES = [...liveGames, ...FIBA_GAMES];
-      setLiveStatus('ok', data.fetchedAt);
-    }
-
-    hideOffSeasonBanner();
-  } catch (err) {
-    console.warn('Live fetch failed, using fallback:', err.message);
-    if (!GAMES.length) GAMES = [...FALLBACK_NBA_GAMES, ...FIBA_GAMES];
-    setLiveStatus('error');
-  } finally {
-    fetchInProgress = false;
-  }
-}
-
-function showOffSeasonBanner(nextStart) {
-  let b = document.getElementById('offseason-banner');
-  if (!b) {
-    b = document.createElement('div');
-    b.id = 'offseason-banner';
-    b.style.cssText = 'background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.25);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--accent-text);display:flex;align-items:center;gap:8px;';
-    b.innerHTML = `<i class="ti ti-moon" style="font-size:16px;flex-shrink:0;"></i><div><strong>NBA Off-Season</strong> — No games until ${nextStart || 'October'}. Live scores will activate automatically when the season starts. Showing last known data below.</div>`;
-    const tabs = document.querySelector('.tabs');
-    tabs.parentNode.insertBefore(b, tabs.nextSibling);
-  }
-}
-function hideOffSeasonBanner() {
-  const b = document.getElementById('offseason-banner');
-  if (b) b.remove();
-}
-
-function setLiveStatus(state, fetchedAt, note) {
-  const el = document.getElementById('live-status');
-  if (!el) return;
-  if      (state === 'fetching')  { el.textContent = '⟳ Syncing…';                                                          el.style.color = 'var(--text-muted)'; }
-  else if (state === 'ok')        { el.textContent = '● Live · ' + (note || ('updated ' + (fetchedAt ? toRO(fetchedAt) : 'now'))); el.style.color = '#4ade80'; }
-  else if (state === 'offseason') { el.textContent = '○ Off-season';                                                         el.style.color = 'var(--text-muted)'; }
-  else                            { el.textContent = '○ Offline — cached data';                                              el.style.color = 'var(--live-red)'; }
-}
-
-const UBT_GAMES = [
-  { id:'ubt-1', home:'U-BT Cluj-Napoca', away:'KK Borac Cacak', time:'2026-02-02T18:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'Liga ABA', status:'final', homeScore:97, awayScore:76, tv:'ABA Liga TV', tvClass:'abaliga' },
-  { id:'ubt-2', home:'Neptunas Klaipeda', away:'U-BT Cluj-Napoca', time:'2025-12-12T19:00:00+02:00', venue:'Klaipeda', round:'EuroCup', status:'final', homeScore:97, awayScore:118, tv:'Eurosport', tvClass:'eurocup' },
-  { id:'ubt-3', home:'U-BT Cluj-Napoca', away:'WKS Slask Wroclaw', time:'2025-12-12T19:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'EuroCup', status:'final', homeScore:94, awayScore:92, tv:'Eurosport', tvClass:'eurocup' },
-  { id:'ubt-4', home:'CSM Oradea', away:'U-BT Cluj-Napoca', time:'2026-05-10T18:00:00+02:00', venue:'Oradea', round:'LNBM Final', status:'final', homeScore:72, awayScore:74, tv:'Digi Sport', tvClass:'digi' },
-  { id:'ubt-up1', home:'U-BT Cluj-Napoca', away:'TBD', time:'2026-10-10T19:00:00+02:00', venue:'BTarena, Cluj-Napoca', round:'EuroCup 2026-27 R1', status:'upcoming', tv:'Eurosport', tvClass:'eurocup' },
-  { id:'ubt-up2', home:'TBD', away:'U-BT Cluj-Napoca', time:'2026-10-17T19:00:00+02:00', venue:'TBD', round:'Liga ABA 2026-27 R1', status:'upcoming', tv:'ABA Liga TV', tvClass:'abaliga' },
+const UBT_GAMES=[
+  {id:'ubt-1',home:'U-BT Cluj-Napoca',away:'KK Borac Cacak',time:'2026-02-02T18:00:00+02:00',venue:'BTarena',round:'Liga ABA',status:'final',homeScore:97,awayScore:76,tv:'ABA Liga TV',tvClass:'abaliga'},
+  {id:'ubt-2',home:'Neptunas Klaipeda',away:'U-BT Cluj-Napoca',time:'2025-12-12T19:00:00+02:00',venue:'Klaipeda',round:'EuroCup',status:'final',homeScore:97,awayScore:118,tv:'Eurosport',tvClass:'eurocup'},
+  {id:'ubt-3',home:'U-BT Cluj-Napoca',away:'WKS Slask Wroclaw',time:'2025-12-12T19:00:00+02:00',venue:'BTarena',round:'EuroCup',status:'final',homeScore:94,awayScore:92,tv:'Eurosport',tvClass:'eurocup'},
+  {id:'ubt-4',home:'CSM Oradea',away:'U-BT Cluj-Napoca',time:'2026-05-10T18:00:00+02:00',venue:'Oradea',round:'LNBM Final',status:'final',homeScore:72,awayScore:74,tv:'Digi Sport',tvClass:'digi'},
+  {id:'ubt-up1',home:'U-BT Cluj-Napoca',away:'TBD',time:'2026-10-10T19:00:00+02:00',venue:'BTarena',round:'EuroCup 2026-27 R1',status:'upcoming',tv:'Eurosport',tvClass:'eurocup'},
+  {id:'ubt-up2',home:'TBD',away:'U-BT Cluj-Napoca',time:'2026-10-17T19:00:00+02:00',venue:'TBD',round:'Liga ABA 2026-27 R1',status:'upcoming',tv:'ABA Liga TV',tvClass:'abaliga'},
 ];
-
-const ROMANIA_GAMES = [
-  { id:'ro-1', home:'Romania', away:'Bulgaria', time:'2026-11-20T19:00:00+02:00', venue:'Sala Polivalentă, Cluj-Napoca', round:'EuroBasket 2027 Qual. W1', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
-  { id:'ro-2', home:'Greece', away:'Romania', time:'2026-11-24T20:00:00+02:00', venue:'Athens', round:'EuroBasket 2027 Qual. W2', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
-  { id:'ro-3', home:'Romania', away:'North Macedonia', time:'2027-02-19T19:00:00+02:00', venue:'Sala Polivalentă, Bucharest', round:'EuroBasket 2027 Qual. W3', status:'upcoming', tv:'TVR Sport', tvClass:'tvr' },
+const ROMANIA_GAMES=[
+  {id:'ro-1',home:'Romania',away:'Bulgaria',time:'2026-11-20T19:00:00+02:00',venue:'Sala Polivalentă, Cluj-Napoca',round:'EuroBasket 2027 Qual.',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
+  {id:'ro-2',home:'Greece',away:'Romania',time:'2026-11-24T20:00:00+02:00',venue:'Athens',round:'EuroBasket 2027 Qual.',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
+  {id:'ro-3',home:'Romania',away:'North Macedonia',time:'2027-02-19T19:00:00+02:00',venue:'Sala Polivalentă, Bucharest',round:'EuroBasket 2027 Qual.',status:'upcoming',tv:'TVR Sport',tvClass:'tvr'},
 ];
-
-const UBT_ROSTER = [
-  { num:0,  name:'Daron Russell',    pos:'PG', flag:'🇺🇸' },
-  { num:3,  name:'Nighael Ceaser',   pos:'SF', flag:'🇺🇸' },
-  { num:5,  name:'Dušan Miletić',    pos:'PF', flag:'🇷🇸' },
-  { num:7,  name:'Mitchell Creek',   pos:'SF', flag:'🇦🇺' },
-  { num:10, name:'Karel Guzmán',     pos:'PG', flag:'🇨🇺' },
-  { num:14, name:'Luka Božić',       pos:'SG', flag:'🇷🇸' },
-  { num:21, name:'Augustas Marčiulionis', pos:'SG', flag:'🇱🇹' },
-  { num:33, name:'Bogdan Radosavljević', pos:'C', flag:'🇷🇸' },
-  { num:44, name:'Vlad Moldoveanu',  pos:'F',  flag:'🇷🇴' },
+const UBT_ROSTER=[
+  {num:0,name:'Daron Russell',pos:'PG',flag:'🇺🇸'},{num:3,name:'Nighael Ceaser',pos:'SF',flag:'🇺🇸'},
+  {num:5,name:'Dušan Miletić',pos:'PF',flag:'🇷🇸'},{num:7,name:'Mitchell Creek',pos:'SF',flag:'🇦🇺'},
+  {num:10,name:'Karel Guzmán',pos:'PG',flag:'🇨🇺'},{num:14,name:'Luka Božić',pos:'SG',flag:'🇷🇸'},
+  {num:21,name:'Augustas Marčiulionis',pos:'SG',flag:'🇱🇹'},{num:33,name:'Bogdan Radosavljević',pos:'C',flag:'🇷🇸'},
+  {num:44,name:'Vlad Moldoveanu',pos:'F',flag:'🇷🇴'},
 ];
-
-// NBA CDN headshot: https://cdn.nba.com/headshots/nba/latest/260x190/{nbaId}.png
-// FIBA/EuroCup players: use ESPN combiner or a fallback avatar
-const NBA_IMG  = id => `https://cdn.nba.com/headshots/nba/latest/260x190/${id}.png`;
-const ESPN_IMG = id => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=260&h=190`;
-const AVATAR   = (name, color='1d428a') => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color}&color=fff&size=260&bold=true`;
-
-const STARS_NBA = [
-  { name:'Shai Gilgeous-Alexander', team:'Oklahoma City Thunder', pos:'G', flag:'🇨🇦', img:NBA_IMG('1628983'),  stats:{PTS:32.7,REB:5.5,AST:6.4}, note:'2× MVP — effortless scorer, elite defender. Led OKC to the best record in the West' },
-  { name:'Victor Wembanyama',        team:'San Antonio Spurs',     pos:'C', flag:'🇫🇷', img:NBA_IMG('1641705'),  stats:{PTS:26.4,REB:10.6,BLK:3.8}, note:'7\'3" once-in-a-generation talent — shoots 3s, blocks everything, handles like a guard' },
-  { name:'Nikola Jokić',             team:'Denver Nuggets',         pos:'C', flag:'🇷🇸', img:NBA_IMG('203999'),   stats:{PTS:27.1,REB:12.3,AST:10.4}, note:'3× MVP and the best passing big man ever. Watch every single possession' },
-  { name:'LeBron James',             team:'Los Angeles Lakers',     pos:'F', flag:'🇺🇸', img:NBA_IMG('2544'),     stats:{PTS:22.1,REB:7.8,AST:8.2}, note:'Still elite at 41. Living history — the GOAT debate is happening in real time' },
-  { name:'Jayson Tatum',             team:'Boston Celtics',         pos:'F', flag:'🇺🇸', img:NBA_IMG('1628369'),  stats:{PTS:28.5,REB:8.2,AST:4.9}, note:'Celtic dynasty engine — silky scorer and elite clutch performer' },
-  { name:'Stephen Curry',            team:'Golden State Warriors',  pos:'G', flag:'🇺🇸', img:NBA_IMG('201939'),   stats:{PTS:24.2,REB:4.1,AST:6.3}, note:'Revolutionised basketball. The greatest shooter in the history of the sport' },
+const STARS_NBA=[
+  {name:'Shai Gilgeous-Alexander',team:'Oklahoma City Thunder',pos:'G',flag:'🇨🇦',img:NBA_IMG('1628983'),stats:{PTS:32.7,REB:5.5,AST:6.4},note:'2× MVP — effortless scorer, elite defender, led OKC to the best record in the West'},
+  {name:'Victor Wembanyama',team:'San Antonio Spurs',pos:'C',flag:'🇫🇷',img:NBA_IMG('1641705'),stats:{PTS:26.4,REB:10.6,BLK:3.8},note:'7\'3" once-in-a-generation — shoots 3s, blocks everything, handles like a guard'},
+  {name:'Nikola Jokić',team:'Denver Nuggets',pos:'C',flag:'🇷🇸',img:NBA_IMG('203999'),stats:{PTS:27.1,REB:12.3,AST:10.4},note:'3× MVP — best passing big man ever. Watch every single possession'},
+  {name:'LeBron James',team:'Los Angeles Lakers',pos:'F',flag:'🇺🇸',img:NBA_IMG('2544'),stats:{PTS:22.1,REB:7.8,AST:8.2},note:'Still elite at 41. Living history — the GOAT debate in real time'},
+  {name:'Jayson Tatum',team:'Boston Celtics',pos:'F',flag:'🇺🇸',img:NBA_IMG('1628369'),stats:{PTS:28.5,REB:8.2,AST:4.9},note:'Celtic dynasty engine — silky scorer and elite clutch performer'},
+  {name:'Stephen Curry',team:'Golden State Warriors',pos:'G',flag:'🇺🇸',img:NBA_IMG('201939'),stats:{PTS:24.2,REB:4.1,AST:6.3},note:'Revolutionised basketball. The greatest shooter in history'},
 ];
-
-const STARS_FIBA = [
-  { name:'Giannis Antetokounmpo', team:'Greece / Milwaukee Bucks',      pos:'F', flag:'🇬🇷', img:NBA_IMG('203507'),  stats:{PTS:30.4,REB:11.8,AST:6.5}, note:'The Greek Freak. 2× MVP, NBA champion — one of the most physically imposing players ever' },
-  { name:'Luka Dončić',           team:'Slovenia / Los Angeles Lakers', pos:'G', flag:'🇸🇮', img:NBA_IMG('1629029'), stats:{PTS:29.8,REB:8.6,AST:8.8}, note:'EuroLeague MVP at 18, NBA Finals MVP — the best European player of his generation' },
-  { name:'Bogdan Bogdanović',     team:'Serbia / Atlanta Hawks',        pos:'G', flag:'🇷🇸', img:NBA_IMG('203992'),  stats:{PTS:18.4,REB:3.2,AST:4.1}, note:'Elite European shooter and playmaker — dangerous in FIBA windows for Serbia' },
-  { name:'Rudy Gobert',           team:'France / Minnesota TWolves',    pos:'C', flag:'🇫🇷', img:NBA_IMG('203497'),  stats:{PTS:14.2,REB:11.8,BLK:2.1}, note:'4× NBA Defensive Player of the Year — France\'s anchor and best defensive big in the world' },
-  { name:'Dennis Schröder',       team:'Germany / Brooklyn Nets',       pos:'G', flag:'🇩🇪', img:NBA_IMG('203471'),  stats:{PTS:17.9,REB:3.4,AST:5.9}, note:'Led Germany to EuroBasket glory 2022 — relentless competitor and born team leader' },
-  { name:'Nikola Mirotić',        team:'EuroLeague legend',             pos:'F', flag:'🇲🇪', img:AVATAR('NM','0a5c36'), stats:{PTS:19.4,REB:6.8,AST:2.1}, note:'One of the greatest European big men of his era — deadly shooter, EuroLeague champion' },
+const STARS_FIBA=[
+  {name:'Giannis Antetokounmpo',team:'Greece / Milwaukee Bucks',pos:'F',flag:'🇬🇷',img:NBA_IMG('203507'),stats:{PTS:30.4,REB:11.8,AST:6.5},note:'The Greek Freak — 2× MVP, NBA champion, one of the most physically imposing players ever'},
+  {name:'Luka Dončić',team:'Slovenia / LA Lakers',pos:'G',flag:'🇸🇮',img:NBA_IMG('1629029'),stats:{PTS:29.8,REB:8.6,AST:8.8},note:'EuroLeague MVP at 18, NBA Finals MVP — best European player of his generation'},
+  {name:'Bogdan Bogdanović',team:'Serbia / Atlanta Hawks',pos:'G',flag:'🇷🇸',img:NBA_IMG('203992'),stats:{PTS:18.4,REB:3.2,AST:4.1},note:'Elite European shooter and playmaker — dangerous in FIBA windows for Serbia'},
+  {name:'Rudy Gobert',team:'France / Minnesota Wolves',pos:'C',flag:'🇫🇷',img:NBA_IMG('203497'),stats:{PTS:14.2,REB:11.8,BLK:2.1},note:'4× NBA Defensive Player of Year — France\'s anchor and best defensive big in the world'},
+  {name:'Dennis Schröder',team:'Germany / Brooklyn Nets',pos:'G',flag:'🇩🇪',img:NBA_IMG('203471'),stats:{PTS:17.9,REB:3.4,AST:5.9},note:'Led Germany to EuroBasket glory 2022 — relentless competitor and born team leader'},
+  {name:'Nikola Mirotić',team:'EuroLeague legend',pos:'F',flag:'🇲🇪',img:AVATAR('NM','0a5c36'),stats:{PTS:19.4,REB:6.8,AST:2.1},note:'One of the greatest European big men — deadly shooter, EuroLeague champion'},
 ];
-
-const STARS_UBT = [
-  { name:'Daron Russell',           team:'U-BT Cluj-Napoca', pos:'PG', flag:'🇺🇸', img:AVATAR('DR','1d428a'), stats:{PTS:18.2,AST:5.8,REB:3.1}, note:'Team leader and engine — controls tempo and creates offense for everyone around him' },
-  { name:'Mitchell Creek',          team:'U-BT Cluj-Napoca', pos:'SF', flag:'🇦🇺', img:AVATAR('MC','1d428a'), stats:{PTS:15.4,REB:7.2,AST:2.1}, note:'Athletic Australian forward — motor never stops, great on both ends of the floor' },
-  { name:'Augustas Marčiulionis',   team:'U-BT Cluj-Napoca', pos:'SG', flag:'🇱🇹', img:AVATAR('AM','1d428a'), stats:{PTS:13.8,REB:2.9,AST:3.4}, note:'Son of Šarūnas Marčiulionis — sharpshooting guard with elite basketball IQ' },
-  { name:'Vlad Moldoveanu',         team:'U-BT Cluj-Napoca', pos:'F',  flag:'🇷🇴', img:AVATAR('VM','c8a44a'), stats:{PTS:9.4,REB:4.8,AST:1.2}, note:'Romanian international and fan favourite — pride of the local fanbase at BTarena' },
+const STARS_UBT=[
+  {name:'Daron Russell',team:'U-BT Cluj-Napoca',pos:'PG',flag:'🇺🇸',img:AVATAR('DR','1d428a'),stats:{PTS:18.2,AST:5.8,REB:3.1},note:'Team leader — controls tempo and creates offense for everyone around him'},
+  {name:'Mitchell Creek',team:'U-BT Cluj-Napoca',pos:'SF',flag:'🇦🇺',img:AVATAR('MC','1d428a'),stats:{PTS:15.4,REB:7.2,AST:2.1},note:'Athletic Australian forward — motor never stops, great on both ends of the floor'},
+  {name:'Augustas Marčiulionis',team:'U-BT Cluj-Napoca',pos:'SG',flag:'🇱🇹',img:AVATAR('AM','1d428a'),stats:{PTS:13.8,REB:2.9,AST:3.4},note:'Son of Šarūnas — sharpshooting guard with elite basketball IQ'},
+  {name:'Vlad Moldoveanu',team:'U-BT Cluj-Napoca',pos:'F',flag:'🇷🇴',img:AVATAR('VM','c8a44a'),stats:{PTS:9.4,REB:4.8,AST:1.2},note:'Romanian international and fan favourite — pride of the BTarena faithful'},
 ];
+const STARS_ALL=[...STARS_NBA,...STARS_FIBA,...STARS_UBT];
 
-// Spotlight cycles through all stars
-const STARS_ALL = [...STARS_NBA, ...STARS_FIBA, ...STARS_UBT];
-
-const BRACKET = {
-  West: {
-    label:'West Semis',
-    series:[
-      { top:{seed:1,name:'OKC Thunder',wins:3}, bot:{seed:5,name:'Houston Rockets',wins:1}, leader:'OKC', active:true },
-      { top:{seed:2,name:'San Antonio Spurs',wins:2}, bot:{seed:3,name:'Denver Nuggets',wins:2}, leader:null, active:true },
-    ]
-  },
-  East: {
-    label:'East Semis',
-    series:[
-      { top:{seed:1,name:'Detroit Pistons',wins:2}, bot:{seed:4,name:'Cleveland Cavaliers',wins:2}, leader:null, active:true },
-      { top:{seed:2,name:'Boston Celtics',wins:3}, bot:{seed:3,name:'New York Knicks',wins:2}, leader:'BOS', active:true },
-    ]
-  }
+const BRACKET={
+  West:{series:[
+    {top:{seed:1,name:'OKC Thunder',wins:3},bot:{seed:5,name:'Houston Rockets',wins:1},active:true},
+    {top:{seed:2,name:'San Antonio Spurs',wins:2},bot:{seed:3,name:'Denver Nuggets',wins:2},active:true},
+  ]},
+  East:{series:[
+    {top:{seed:1,name:'Detroit Pistons',wins:2},bot:{seed:4,name:'Cleveland Cavaliers',wins:2},active:true},
+    {top:{seed:2,name:'Boston Celtics',wins:3},bot:{seed:3,name:'New York Knicks',wins:2},active:true},
+  ]}
 };
-
-const STANDINGS = {
+const STANDINGS={
   East:[
     {rank:1,team:'Detroit Pistons',w:60,l:22,pct:.732,tag:'Conf Finals'},
     {rank:2,team:'Boston Celtics',w:56,l:26,pct:.683,tag:'Playoff'},
@@ -739,211 +713,380 @@ const STANDINGS = {
 };
 
 // ── STATE ─────────────────────────────────────────────────────────────────
-let currentLeague  = 'all';
-let currentConf    = 'East';
-let currentNews    = 'nba';
-let spotlightIdx   = 0;
-const newsCache    = {}; // section → articles, so we don't re-fetch on tab switch
+let currentLeague='all', currentConf='East', currentNews='nba', spotlightIdx=0;
+let selectedWeekDay=null;
+const newsCache={};
+let predictions=JSON.parse(localStorage.getItem('bkt-predictions')||'{}');
+function savePredictions(){localStorage.setItem('bkt-predictions',JSON.stringify(predictions));}
 
-// ── RENDER HELPERS ────────────────────────────────────────────────────────
-function gameCard(g, badge, showReminder=true) {
-  const isUpcoming = g.status === 'upcoming';
-  const cd = isUpcoming ? countdown(g.time) : null;
-  const rSet = reminders[g.id];
-  const spoilerClass = (g.status==='final') ? 'spoiler-wrap' : '';
-  const scoreHtml = g.homeScore !== undefined
-    ? `<div class="${spoilerClass}"><span class="score-val">${g.awayScore}–${g.homeScore}</span></div>`
-    : '';
-  return `
-  <div class="game-card${g.status==='live'?' live':''}">
+// ── LIVE FETCH ────────────────────────────────────────────────────────────
+function workerGameToLocal(g){
+  const p=g.period>0?`Q${g.period}`:'';
+  const c=g.clock?g.clock.replace('PT','').replace('M',':').replace('S','').replace(/\..*/,''):'';
+  return {
+    id:'nba-live-'+g.id, league:'NBA',
+    home:g.home.name, away:g.away.name,
+    time:g.startTimeUTC, venue:'', round:g.series||'NBA 2025-26',
+    status:g.status, homeScore:g.home.score, awayScore:g.away.score,
+    quarter:(p+(c?' '+c:'')).trim(), tv:'AntenaPLAY', tvClass:'antenaplay',
+  };
+}
+
+let fetchInProgress=false;
+async function fetchLiveNBA(){
+  if(fetchInProgress)return;
+  fetchInProgress=true; setLiveStatus('fetching');
+  try{
+    const res=await fetch(WORKER_URL+'/nba/scoreboard',{signal:AbortSignal.timeout(10000)});
+    if(!res.ok)throw new Error('Worker '+res.status);
+    const data=await res.json();
+    if(data.offSeason){
+      GAMES=[...FALLBACK_NBA,...FIBA_GAMES];
+      setLiveStatus('offseason');
+      showOffSeasonBanner(data.nextSeasonStart);
+      return;
+    }
+    const live=(data.games||[]).map(workerGameToLocal);
+    GAMES=live.length?[...live,...FIBA_GAMES]:[...FIBA_GAMES];
+    setLiveStatus('ok',data.fetchedAt,live.length===0?'No NBA today':null);
+    hideOffSeasonBanner();
+  }catch(e){
+    if(!GAMES.length)GAMES=[...FALLBACK_NBA,...FIBA_GAMES];
+    setLiveStatus('error');
+  }finally{fetchInProgress=false;}
+}
+
+function showOffSeasonBanner(next){
+  if(document.getElementById('offseason-banner'))return;
+  const b=document.createElement('div');
+  b.id='offseason-banner';
+  b.style.cssText='background:var(--accent-bg);border:1px solid rgba(37,99,235,.25);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--accent-text);display:flex;align-items:center;gap:8px';
+  b.innerHTML=`<i class="ti ti-moon" style="font-size:16px;flex-shrink:0"></i><div><strong>NBA Off-Season</strong> — No games until ${next||'October'}. Live scores activate automatically when the season starts.</div>`;
+  document.querySelector('.tabs').after(b);
+}
+function hideOffSeasonBanner(){const b=document.getElementById('offseason-banner');if(b)b.remove();}
+
+// ── NOW BANNER ────────────────────────────────────────────────────────────
+function renderNowBanner(){
+  const b=document.getElementById('now-banner');
+  const live=GAMES.filter(g=>g.status==='live');
+  const upcoming=GAMES.filter(g=>g.status==='upcoming').sort((a,c)=>new Date(a.time)-new Date(c.time));
+  const allGames=[...GAMES,...UBT_GAMES,...ROMANIA_GAMES];
+  const nextUp=allGames.filter(g=>g.status==='upcoming').sort((a,c)=>new Date(a.time)-new Date(c.time))[0];
+
+  if(live.length){
+    const g=live[0];
+    b.className='live';
+    document.getElementById('now-label')||0;
+    b.innerHTML=`<div class="now-icon">🔴</div>
+      <div class="now-main">
+        <div class="now-label">Live now · ${g.league}</div>
+        <div class="now-title">${g.away} @ ${g.home}</div>
+        <div class="now-sub">${g.quarter||''} · ${g.tv||''}</div>
+      </div>
+      <div class="now-right">
+        <div class="now-score">${g.awayScore}–${g.homeScore}</div>
+      </div>`;
+  } else if(nextUp){
+    const cd=countdown(nextUp.time);
+    const league=nextUp.league||'U-BT';
+    b.className='upcoming';
+    b.innerHTML=`<div class="now-icon">⏰</div>
+      <div class="now-main">
+        <div class="now-label">Next game · ${league}</div>
+        <div class="now-title">${(nextUp.away||'?')} @ ${nextUp.home}</div>
+        <div class="now-sub">${toRO(nextUp.time)} · ${toRODate(nextUp.time)}</div>
+      </div>
+      <div class="now-right">
+        <div class="now-score" style="font-size:15px;color:var(--accent-text)">${cd||''}</div>
+        <div class="now-time">${nextUp.tv||''}</div>
+      </div>`;
+  } else {
+    b.className='idle';
+    b.innerHTML=`<div class="now-icon">😴</div>
+      <div class="now-main">
+        <div class="now-label">No games right now</div>
+        <div class="now-title">Check back soon</div>
+        <div class="now-sub">All upcoming games in the Schedule tab</div>
+      </div>`;
+  }
+}
+function handleNowClick(){
+  const live=GAMES.filter(g=>g.status==='live');
+  if(live.length) switchTabByName('scores');
+  else switchTabByName('schedule');
+}
+function switchTabByName(name){
+  const tabs=document.querySelectorAll('.tab');
+  const map=['schedule','scores','week','bracket','standings','predict','ubt','romania','stars','compare','news'];
+  const idx=map.indexOf(name);
+  if(idx>=0&&tabs[idx]) switchTab(name,tabs[idx]);
+}
+
+// ── GAME CARD ─────────────────────────────────────────────────────────────
+function gameCard(g,badge,showReminder=true){
+  const isUp=g.status==='upcoming';
+  const cd=isUp?countdown(g.time):null;
+  const rSet=reminders[g.id];
+  const spClass=g.status==='final'?'spoiler-wrap':'';
+  const scoreHtml=g.homeScore!==undefined?`<div class="${spClass}"><span class="score-val">${g.awayScore}–${g.homeScore}</span></div>`:'';
+  const ubtHL=ubtMode&&(g.home||'').includes('U-BT')?'ubt-highlighted':'';
+  return `<div class="game-card${g.status==='live'?' live':''} ${ubtHL}">
     ${badge}
     <div class="game-teams">
-      <div class="matchup">${g.away === 'TBD' ? g.home+' vs TBD' : g.away+' @ '+g.home}</div>
-      <div class="meta">${g.round}${g.venue && isUpcoming ? ' · '+g.venue : ''}</div>
+      <div class="matchup">${g.away==='TBD'?g.home+' vs TBD':g.away+' @ '+g.home}</div>
+      <div class="meta">${g.round}${g.venue&&isUp?' · '+g.venue:''}</div>
       <div class="tag-row">
-        ${g.tv ? `<span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px;"></i>${g.tv}</span>` : ''}
-        ${showReminder && isUpcoming ? `<button class="reminder-btn${rSet?' set':''}" onclick="toggleReminder('${g.id}','${g.time}','${(g.away+' @ '+g.home).replace(/'/g,"\\'")}')"><i class="ti ti-bell" style="font-size:11px;"></i>${rSet?'Reminder set':'Remind me'}</button>` : ''}
+        ${g.tv?`<span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px"></i>${g.tv}</span>`:''}
+        ${showReminder&&isUp?`<button class="reminder-btn${rSet?' set':''}" onclick="toggleReminder('${g.id}','${g.time}','${(g.away+' @ '+g.home).replace(/'/g,"\\'")}')"><i class="ti ti-bell" style="font-size:11px"></i>${rSet?'Set':'Remind me'}</button>`:''}
+        ${isUp?`<button class="share-btn" onclick="shareGame(${JSON.stringify(g).replace(/"/g,'&quot;')})"><i class="ti ti-brand-whatsapp" style="font-size:11px"></i>Share</button>`:''}
       </div>
     </div>
     <div class="game-right">
-      ${g.status==='live' ? `<span class="live-dot"><span class="dot"></span>${g.quarter}</span>` : ''}
-      ${isUpcoming ? `<div class="time-ro">${toRO(g.time)}</div><div class="meta">${toRODate(g.time)}</div>` : ''}
-      ${g.status==='live' ? `<div class="meta">${g.awayScore}–${g.homeScore}</div>` : ''}
-      ${g.status==='final' ? scoreHtml+'<div class="meta">Final · '+toRODate(g.time)+'</div>' : ''}
-      ${cd ? `<div class="countdown" data-countdown="${g.time}">${cd}</div>` : ''}
+      ${g.status==='live'?`<span class="live-dot"><span class="dot"></span>${g.quarter}</span>`:''}
+      ${isUp?`<div class="time-ro">${toRO(g.time)}</div><div class="meta">${toRODate(g.time)}</div>`:''}
+      ${g.status==='live'?`<div class="meta">${g.awayScore}–${g.homeScore}</div>`:''}
+      ${g.status==='final'?scoreHtml+'<div class="meta">Final · '+toRODate(g.time)+'</div>':''}
+      ${cd?`<div class="countdown" data-countdown="${g.time}">${cd}</div>`:''}
     </div>
   </div>`;
 }
 
 // ── SCHEDULE ──────────────────────────────────────────────────────────────
-function renderSchedule() {
-  const filtered = GAMES.filter(g => currentLeague==='all' || g.league===currentLeague);
-  const live     = filtered.filter(g=>g.status==='live');
-  const upcoming = filtered.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
-  const finished = filtered.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
-  let html = '';
-  const badge = g => `<div class="league-badge ${g.league.toLowerCase()}">${g.league}</div>`;
-  if (live.length)     { html += '<div class="day-label">Live now</div>'+live.map(g=>gameCard(g,badge(g))).join(''); }
-  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge(g))).join(''); }
-  if (finished.length) { html += '<div class="day-label">Recent results</div>'+finished.map(g=>gameCard(g,badge(g))).join(''); }
-  if (!html)           { html = `<div class="empty"><i class="ti ti-calendar-off"></i>No games to show.</div>`; }
-  document.getElementById('schedule-list').innerHTML = html;
-  applySpoilers();
-  updateCountdowns();
+function renderSchedule(){
+  const filtered=GAMES.filter(g=>currentLeague==='all'||g.league===currentLeague);
+  const live=filtered.filter(g=>g.status==='live');
+  const upcoming=filtered.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished=filtered.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html='';
+  const badge=g=>`<div class="league-badge ${g.league.toLowerCase()}">${g.league}</div>`;
+  if(live.length)     html+='<div class="day-label">Live now</div>'+live.map(g=>gameCard(g,badge(g))).join('');
+  if(upcoming.length) html+='<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge(g))).join('');
+  if(finished.length) html+='<div class="day-label">Recent results</div>'+finished.map(g=>gameCard(g,badge(g))).join('');
+  if(!html)           html='<div class="empty"><i class="ti ti-calendar-off"></i>No games to show.</div>';
+  document.getElementById('schedule-list').innerHTML=html;
+  applySpoilers(); updateCountdowns(); applyUBTMode();
 }
 
 // ── SCORES ────────────────────────────────────────────────────────────────
-function renderScores() {
-  const live     = GAMES.filter(g=>g.status==='live');
-  const finished = GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
-  let html = '';
-  if (live.length) {
-    html += '<div class="day-label">Live now</div>';
-    html += live.map(g=>{
-      const hL = g.homeScore>g.awayScore;
-      return `<div class="score-card" style="border-left:3px solid var(--live-red);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:8px;"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px;">${g.league}</div><span style="font-size:12px;color:var(--text-secondary);">${g.round}</span></div>
+function renderScores(){
+  const live=GAMES.filter(g=>g.status==='live');
+  const finished=GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html='';
+  if(live.length){
+    html+='<div class="day-label">Live now</div>';
+    html+=live.map(g=>{
+      const hL=g.homeScore>g.awayScore;
+      return `<div class="score-card" style="border-left:3px solid var(--live-red)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px">${g.league}</div><span style="font-size:12px;color:var(--text-secondary)">${g.round}</span></div>
           <span class="live-dot"><span class="dot"></span>${g.quarter}</span>
         </div>
         <div class="score-row"><span class="team-name">${g.away}</span><span class="pts ${!hL?'leading':''}">${g.awayScore}</span></div>
         <div class="divider-score"></div>
         <div class="score-row"><span class="team-name">${g.home}</span><span class="pts ${hL?'leading':''}">${g.homeScore}</span></div>
-        <div class="meta" style="margin-top:8px;"><i class="ti ti-device-tv" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${g.tv}</div>
+        <div class="meta" style="margin-top:8px"><i class="ti ti-device-tv" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>${g.tv}</div>
       </div>`;
     }).join('');
   }
-  if (finished.length) {
-    html += '<div class="day-label">Final scores</div>';
-    html += finished.map(g=>{
-      const hW = g.homeScore>g.awayScore;
-      const sp = 'spoiler-wrap';
+  if(finished.length){
+    html+='<div class="day-label">Final scores</div>';
+    html+=finished.map(g=>{
+      const hW=g.homeScore>g.awayScore;
       return `<div class="score-card">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px;">${g.league}</div><span style="font-size:12px;color:var(--text-secondary);">${g.round} · ${toRODate(g.time)}</span></div>
-        <div class="score-row"><span class="team-name" style="font-weight:${!hW?600:400}">${g.away}${!hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${!hW?'leading':''} ${sp}"><span class="score-val">${g.awayScore}</span></span></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div class="league-badge ${g.league.toLowerCase()}" style="width:28px;height:28px;font-size:9px">${g.league}</div><span style="font-size:12px;color:var(--text-secondary)">${g.round} · ${toRODate(g.time)}</span></div>
+        <div class="score-row"><span class="team-name" style="font-weight:${!hW?600:400}">${g.away}${!hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${!hW?'leading':''} spoiler-wrap"><span class="score-val">${g.awayScore}</span></span></div>
         <div class="divider-score"></div>
-        <div class="score-row"><span class="team-name" style="font-weight:${hW?600:400}">${g.home}${hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${hW?'leading':''} ${sp}"><span class="score-val">${g.homeScore}</span></span></div>
+        <div class="score-row"><span class="team-name" style="font-weight:${hW?600:400}">${g.home}${hW?'<span class="win-tag">W</span>':''}</span><span class="pts ${hW?'leading':''} spoiler-wrap"><span class="score-val">${g.homeScore}</span></span></div>
       </div>`;
     }).join('');
   }
-  if (!html) html = `<div class="empty"><i class="ti ti-ball-basketball"></i>No live games right now.</div>`;
-  document.getElementById('scores-list').innerHTML = html;
+  if(!html)html='<div class="empty"><i class="ti ti-ball-basketball"></i>No live games right now.</div>';
+  document.getElementById('scores-list').innerHTML=html;
   applySpoilers();
 }
 
+// ── WEEK VIEW ─────────────────────────────────────────────────────────────
+function renderWeek(selectedDateStr){
+  const allG=[...GAMES,...UBT_GAMES,...ROMANIA_GAMES];
+  const today=new Date();
+  const days=[];
+  for(let i=-1;i<=5;i++){
+    const d=new Date(today);
+    d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+  const sel=selectedDateStr||days[1].toLocaleDateString('en-CA',{timeZone:RO_TZ});
+  selectedWeekDay=sel;
+
+  const strip=document.getElementById('week-strip');
+  strip.innerHTML=days.map(d=>{
+    const ds=d.toLocaleDateString('en-CA',{timeZone:RO_TZ});
+    const isToday=ds===todayRO();
+    const dayGames=allG.filter(g=>new Date(g.time).toLocaleDateString('en-CA',{timeZone:RO_TZ})===ds);
+    const nbaD=dayGames.filter(g=>g.league==='NBA'||(!g.league&&!g.home?.includes('Romania')));
+    const fibaD=dayGames.filter(g=>g.league==='FIBA');
+    const ubtD=dayGames.filter(g=>g.home?.includes('U-BT')||g.away?.includes('U-BT'));
+    const isSelected=ds===sel;
+    return `<div class="week-day${isToday?' today':''}${dayGames.length?' has-game':''}${isSelected?' active':''}" onclick="selectWeekDay('${ds}')" style="${isSelected?'border-color:var(--accent);background:var(--accent-bg)':''}">
+      <div class="week-day-name">${d.toLocaleDateString('en-GB',{weekday:'short'})}</div>
+      <div class="week-day-num">${d.getDate()}</div>
+      <div class="week-dots">
+        ${nbaD.length?'<div class="week-dot nba"></div>':''}
+        ${fibaD.length?'<div class="week-dot fiba"></div>':''}
+        ${ubtD.length?'<div class="week-dot ubt"></div>':''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const dayGames=allG.filter(g=>new Date(g.time).toLocaleDateString('en-CA',{timeZone:RO_TZ})===sel);
+  const wg=document.getElementById('week-games');
+  if(!dayGames.length){wg.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>No games on this day.</div>';return;}
+  wg.innerHTML=dayGames.map(g=>{
+    const isNBA=g.league==='NBA'; const isFIBA=g.league==='FIBA';
+    const isUBT=g.home?.includes('U-BT')||g.away?.includes('U-BT');
+    const cls=isNBA?'nba':isFIBA?'fiba':'ubt';
+    const lbl=isNBA?'NBA':isFIBA?'FIBA':'U-BT';
+    const badge=`<div class="league-badge ${cls}">${lbl}</div>`;
+    return gameCard({...g,league:g.league||'UBT'},badge);
+  }).join('');
+  applySpoilers(); updateCountdowns();
+}
+function selectWeekDay(ds){renderWeek(ds);}
+
 // ── BRACKET ───────────────────────────────────────────────────────────────
-function renderBracket() {
-  ['West','East'].forEach(conf => {
-    const data = BRACKET[conf];
-    let html = '';
-    data.series.forEach(s => {
-      const tW = s.top.wins, bW = s.bot.wins;
-      const done = tW===4||bW===4;
-      html += `<div class="bracket-col">
-        <div class="bracket-matchup${s.active?' active':''}">
-          <div class="bracket-team ${tW>bW?'winner':''}">
-            <span class="seed">${s.top.seed}</span><span class="bteam">${s.top.name}</span><span class="bscore">${tW}</span>
-          </div>
-          <div style="height:1px;background:var(--border);margin:5px 0;"></div>
-          <div class="bracket-team ${bW>tW?'winner':''}">
-            <span class="seed">${s.bot.seed}</span><span class="bteam">${s.bot.name}</span><span class="bscore">${bW}</span>
-          </div>
-          <div class="bracket-series">${done ? (tW===4?s.top.name:s.bot.name)+' wins' : tW+'-'+bW}</div>
-        </div>
-      </div>`;
+function renderBracket(){
+  ['West','East'].forEach(conf=>{
+    let html='';
+    BRACKET[conf].series.forEach(s=>{
+      const tW=s.top.wins,bW=s.bot.wins;
+      const done=tW===4||bW===4;
+      html+=`<div class="bracket-col"><div class="bracket-matchup${s.active?' active':''}">
+        <div class="bracket-team ${tW>bW?'winner':''}"><span class="seed">${s.top.seed}</span><span class="bteam">${s.top.name}</span><span class="bscore">${tW}</span></div>
+        <div style="height:1px;background:var(--border);margin:5px 0"></div>
+        <div class="bracket-team ${bW>tW?'winner':''}"><span class="seed">${s.bot.seed}</span><span class="bteam">${s.bot.name}</span><span class="bscore">${bW}</span></div>
+        <div class="bracket-series">${done?(tW===4?s.top.name:s.bot.name)+' wins':tW+'-'+bW}</div>
+      </div></div>`;
     });
-    document.getElementById('bracket-'+conf.toLowerCase()).innerHTML = html;
+    document.getElementById('bracket-'+conf.toLowerCase()).innerHTML=html;
   });
 }
 
 // ── STANDINGS ─────────────────────────────────────────────────────────────
-function renderStandings() {
-  const teams = STANDINGS[currentConf];
-  let rows = teams.map(t=>`
-    <tr class="${t.rank<=8?'playoff-row':''}">
-      <td>${t.rank}</td><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td>
-      <td>${t.pct.toFixed(3)}</td><td><span class="clinched-tag">${t.tag}</span></td>
-    </tr>`).join('');
-  document.getElementById('standings-table').innerHTML = `
-    <table><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PCT</th><th></th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+function renderStandings(){
+  const teams=STANDINGS[currentConf];
+  const rows=teams.map(t=>`<tr class="${t.rank<=8?'playoff-row':''}"><td>${t.rank}</td><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td><td>${t.pct.toFixed(3)}</td><td><span class="clinched-tag">${t.tag}</span></td></tr>`).join('');
+  document.getElementById('standings-table').innerHTML=`<table><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PCT</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ── PREDICTIONS ───────────────────────────────────────────────────────────
+function renderPredictions(){
+  const upcoming=[...GAMES,...UBT_GAMES,...ROMANIA_GAMES].filter(g=>g.status==='upcoming');
+  const finished=[...GAMES,...UBT_GAMES,...ROMANIA_GAMES].filter(g=>g.status==='final');
+
+  // score predictions against finished games
+  finished.forEach(g=>{
+    const p=predictions[g.id];
+    if(p&&p.result===undefined){
+      const actualWinner=g.homeScore>g.awayScore?g.home:g.away;
+      predictions[g.id].result=p.pick===actualWinner?'correct':'wrong';
+      savePredictions();
+    }
+  });
+
+  const all=Object.values(predictions).filter(p=>p.result!==undefined);
+  const correct=all.filter(p=>p.result==='correct').length;
+  document.getElementById('pred-correct').textContent=correct;
+  document.getElementById('pred-total').textContent=all.length;
+  document.getElementById('pred-pct').textContent=all.length?Math.round(correct/all.length*100)+'%':'—';
+
+  if(!upcoming.length){document.getElementById('predict-list').innerHTML='<div class="empty"><i class="ti ti-trophy"></i>No upcoming games to predict right now.</div>';return;}
+
+  document.getElementById('predict-list').innerHTML=upcoming.map(g=>{
+    const p=predictions[g.id];
+    const picked=p?.pick;
+    const result=p?.result;
+    const awayClass=picked===g.away?(result?'picked-'+(result==='correct'&&g.homeScore<g.awayScore?'win':'loss')+(g.homeScore!==undefined?'':(result?'':' picked-win')):'pred-btn picked-win'):'';
+    const homeClass=picked===g.home?(result?'picked-'+(result==='correct'&&g.homeScore>g.awayScore?'win':'loss')+(g.homeScore!==undefined?'':(result?'':' picked-win')):'pred-btn picked-win'):'';
+    const dis=picked?'disabled':'';
+    const awayFinal=picked===g.away&&result?` pred-btn ${result}`:'';
+    const homeFinal=picked===g.home&&result?` pred-btn ${result}`:'';
+    return `<div class="pred-card">
+      <div class="pred-matchup">${g.away} @ ${g.home} <span style="font-size:12px;color:var(--text-muted)">· ${toRO(g.time)} · ${toRODate(g.time)}</span></div>
+      <div class="pred-btns">
+        <button class="pred-btn${picked===g.away?' picked-win':''}${homeFinal}" ${dis} onclick="makePick('${g.id}','${g.away}','${g.home}')">${g.away}</button>
+        <button class="pred-btn${picked===g.home?' picked-win':''}${awayFinal}" ${dis} onclick="makePick('${g.id}','${g.home}','${g.away}')">${g.home}</button>
+      </div>
+      ${picked?`<div class="pred-result">You picked <strong>${picked}</strong>${result?' · '+result.toUpperCase():' · result pending'}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function makePick(gameId,pick,other){
+  predictions[gameId]={pick,other,pickedAt:new Date().toISOString()};
+  savePredictions(); renderPredictions(); toast(`Picked ${pick} 🎯`);
 }
 
 // ── U-BT ──────────────────────────────────────────────────────────────────
-function renderUBT() {
-  const badge = `<div class="league-badge ubt" style="font-size:9px;font-weight:700;margin-top:2px;">U-BT</div>`;
-  const upcoming = UBT_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
-  const finished = UBT_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
-  let html = '';
-  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join(''); }
-  if (finished.length) { html += '<div class="day-label">2025-26 results</div>'+finished.map(g=>{
-    const ubtHome = g.home.includes('U-BT');
-    const won = ubtHome ? g.homeScore>g.awayScore : g.awayScore>g.homeScore;
-    return `<div class="game-card">
-      ${badge}
-      <div class="game-teams">
-        <div class="matchup">${g.away} @ ${g.home}</div>
-        <div class="meta">${g.round} · ${toRODate(g.time)}</div>
-        <div class="tag-row"><span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px;"></i>${g.tv}</span></div>
-      </div>
-      <div class="game-right">
-        <div class="spoiler-wrap"><span class="score-val" style="font-size:15px;font-weight:500;color:${won?'var(--win-green)':'var(--text-secondary)'};">${g.awayScore}–${g.homeScore}</span></div>
-        <div class="meta">${won?'✓ U-BT W':'Final'}</div>
-      </div>
-    </div>`;
-  }).join('');}
-  document.getElementById('ubt-games-list').innerHTML = html || `<div class="section-empty">No games on record.</div>`;
-  // roster
-  document.getElementById('ubt-roster').innerHTML = UBT_ROSTER.map(p=>`
-    <div class="player-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="player-num">#${p.num}</div>
-          <div class="player-name">${p.name}</div>
-          <div class="player-pos">${p.pos}</div>
+function renderUBT(){
+  const badge=`<div class="league-badge ubt" style="font-size:9px;font-weight:700;margin-top:2px">U-BT</div>`;
+  const upcoming=UBT_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished=UBT_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html='';
+  if(upcoming.length)html+='<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join('');
+  if(finished.length){
+    html+='<div class="day-label">2025-26 results</div>';
+    html+=finished.map(g=>{
+      const ubtHome=g.home.includes('U-BT');
+      const won=ubtHome?g.homeScore>g.awayScore:g.awayScore>g.homeScore;
+      return `<div class="game-card">
+        ${badge}
+        <div class="game-teams">
+          <div class="matchup">${g.away} @ ${g.home}</div>
+          <div class="meta">${g.round} · ${toRODate(g.time)}</div>
+          <div class="tag-row"><span class="tv-tag ${g.tvClass}"><i class="ti ti-device-tv" style="font-size:10px"></i>${g.tv}</span></div>
         </div>
-        <div class="player-flag">${p.flag}</div>
-      </div>
-    </div>`).join('');
-  applySpoilers();
-  updateCountdowns();
+        <div class="game-right">
+          <div class="spoiler-wrap"><span class="score-val" style="font-size:15px;font-weight:500;color:${won?'var(--win-green)':'var(--text-secondary)'}">${g.awayScore}–${g.homeScore}</span></div>
+          <div class="meta">${won?'✓ U-BT W':'Final'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('ubt-games-list').innerHTML=html||'<div class="section-empty">No games on record.</div>';
+  document.getElementById('ubt-roster').innerHTML=UBT_ROSTER.map(p=>`<div class="player-card"><div style="display:flex;justify-content:space-between"><div><div class="player-num">#${p.num}</div><div class="player-name">${p.name}</div><div class="player-pos">${p.pos}</div></div><div style="font-size:18px">${p.flag}</div></div></div>`).join('');
+  applySpoilers(); updateCountdowns();
 }
 
 // ── ROMANIA ───────────────────────────────────────────────────────────────
-function renderRomania() {
-  const badge = `<div class="league-badge ro" style="font-size:16px;">🇷🇴</div>`;
-  const upcoming = ROMANIA_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
-  const finished = ROMANIA_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
-  let html = '';
-  if (upcoming.length) { html += '<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join(''); }
-  if (finished.length) { html += '<div class="day-label">Results</div>'+finished.map(g=>gameCard(g,badge)).join(''); }
-  if (!html) html = `<div class="section-empty">No fixtures scheduled yet — check back in autumn 2026.</div>`;
-  document.getElementById('romania-games').innerHTML = html;
+function renderRomania(){
+  const badge=`<div class="league-badge ro" style="font-size:16px">🇷🇴</div>`;
+  const upcoming=ROMANIA_GAMES.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const finished=ROMANIA_GAMES.filter(g=>g.status==='final').sort((a,b)=>new Date(b.time)-new Date(a.time));
+  let html='';
+  if(upcoming.length)html+='<div class="day-label">Upcoming</div>'+upcoming.map(g=>gameCard(g,badge)).join('');
+  if(finished.length)html+='<div class="day-label">Results</div>'+finished.map(g=>gameCard(g,badge)).join('');
+  if(!html)html='<div class="section-empty">No fixtures scheduled yet — check back in autumn 2026.</div>';
+  document.getElementById('romania-games').innerHTML=html;
   updateCountdowns();
 }
 
-// ── STARS ─────────────────────────────────────────────────────────────────
-function renderSpotlight() {
-  const s = STARS_ALL[spotlightIdx];
-  const statsHtml = Object.entries(s.stats).map(([k,v])=>`
-    <div class="stat-block"><div class="stat-val">${v}</div><div class="stat-lbl">${k}</div></div>`).join('');
-  const dotsHtml = STARS_ALL.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
-  document.getElementById('spotlight-card').innerHTML = `
+// ── STARS ────────────────────────────────────────────────────────────────
+function renderSpotlight(){
+  const s=STARS_ALL[spotlightIdx];
+  const statsHtml=Object.entries(s.stats).map(([k,v])=>`<div class="stat-block"><div class="stat-val">${v}</div><div class="stat-lbl">${k}</div></div>`).join('');
+  const dots=STARS_ALL.map((_,i)=>`<div class="spotlight-dot${i===spotlightIdx?' active':''}" onclick="setSpotlight(${i})"></div>`).join('');
+  document.getElementById('spotlight-card').innerHTML=`
     <div class="spotlight-label">⭐ Player Spotlight</div>
     <div class="spotlight-top">
-      <img class="spotlight-img" src="${s.img}" alt="${s.name}" onerror="this.style.display='none'">
-      <div>
-        <div class="spotlight-name">${s.name} ${s.flag||''}</div>
-        <div class="spotlight-team">${s.pos} · ${s.team}</div>
-      </div>
+      <img class="spotlight-img" src="${s.img}" alt="${s.name}" onerror="this.src='${AVATAR(s.name)}'">
+      <div><div class="spotlight-name">${s.name} ${s.flag||''}</div><div class="spotlight-team">${s.pos} · ${s.team}</div></div>
     </div>
     <div class="spotlight-stats">${statsHtml}</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:10px;">${s.note}</div>
-    <div class="spotlight-nav">${dotsHtml}</div>`;
+    <div class="spotlight-note">${s.note}</div>
+    <div class="spotlight-nav">${dots}</div>`;
 }
-function setSpotlight(i) { spotlightIdx=i; renderSpotlight(); }
-
-function starCard(s, i) {
+function setSpotlight(i){spotlightIdx=i;renderSpotlight();}
+function starCard(s,i){
   return `<div class="star-card" onclick="setSpotlight(${i})">
     <div class="star-img-wrap">
       <img class="star-img" src="${s.img}" alt="${s.name}" onerror="this.src='${AVATAR(s.name)}'">
@@ -952,105 +1095,178 @@ function starCard(s, i) {
     <div class="star-body">
       <div class="star-name">${s.name}</div>
       <div class="star-meta">${s.pos} · ${s.team}</div>
-      <div class="star-stats">
-        ${Object.entries(s.stats).map(([k,v])=>`<div><div class="star-stat-val">${v}</div><div class="star-stat-lbl">${k}</div></div>`).join('')}
-      </div>
+      <div class="star-stats">${Object.entries(s.stats).map(([k,v])=>`<div><div class="star-stat-val">${v}</div><div class="star-stat-lbl">${k}</div></div>`).join('')}</div>
     </div>
   </div>`;
 }
-
-function renderStars() {
+function renderStars(){
   renderSpotlight();
-  document.getElementById('stars-nba').innerHTML  = STARS_NBA.map((s,i)=>starCard(s,i)).join('');
-  document.getElementById('stars-fiba').innerHTML = STARS_FIBA.map((s,i)=>starCard(s,STARS_NBA.length+i)).join('');
-  document.getElementById('stars-ubt').innerHTML  = STARS_UBT.map((s,i)=>starCard(s,STARS_NBA.length+STARS_FIBA.length+i)).join('');
+  document.getElementById('stars-nba').innerHTML=STARS_NBA.map((s,i)=>starCard(s,i)).join('');
+  document.getElementById('stars-fiba').innerHTML=STARS_FIBA.map((s,i)=>starCard(s,STARS_NBA.length+i)).join('');
+  document.getElementById('stars-ubt').innerHTML=STARS_UBT.map((s,i)=>starCard(s,STARS_NBA.length+STARS_FIBA.length+i)).join('');
 }
 
-// ── NEWS ──────────────────────────────────────────────────────────────────
-function timeAgo(isoDate) {
-  const diff = Date.now() - new Date(isoDate);
-  const h = Math.floor(diff / 3600000);
-  const d = Math.floor(h / 24);
-  if (h < 1) return 'just now';
-  if (h < 24) return `${h}h ago`;
-  if (d < 7)  return `${d}d ago`;
-  return new Date(isoDate).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+// ── COMPARE ───────────────────────────────────────────────────────────────
+function initCompare(){
+  const all=STARS_ALL;
+  const opts=all.map((s,i)=>`<option value="${i}">${s.name} (${s.team.split('/')[0].trim()})</option>`).join('');
+  document.getElementById('compare-a').innerHTML=opts;
+  document.getElementById('compare-b').innerHTML=opts;
+  document.getElementById('compare-b').value='1';
+  renderCompare();
+}
+function renderCompare(){
+  const ai=+document.getElementById('compare-a').value;
+  const bi=+document.getElementById('compare-b').value;
+  const a=STARS_ALL[ai], b=STARS_ALL[bi];
+  if(!a||!b)return;
+  const allKeys=[...new Set([...Object.keys(a.stats),...Object.keys(b.stats)])];
+  const rows=allKeys.map(k=>{
+    const av=a.stats[k], bv=b.stats[k];
+    const aHi=av!==undefined&&bv!==undefined&&av>bv;
+    const bHi=av!==undefined&&bv!==undefined&&bv>av;
+    return `<tr>
+      <td class="${aHi?'highlight':''}">${av??'—'}</td>
+      <td style="text-align:center;color:var(--text-muted);font-size:11px;font-weight:600">${k}</td>
+      <td class="${bHi?'highlight':''}" style="text-align:right">${bv??'—'}</td>
+    </tr>`;
+  }).join('');
+  const extraRows=[
+    ['Position','pos'],['Team','team'],['Flag','flag']
+  ].map(([label,key])=>`<tr><td>${a[key]}</td><td style="text-align:center;color:var(--text-muted);font-size:11px;font-weight:600">${label}</td><td style="text-align:right">${b[key]}</td></tr>`).join('');
+  document.getElementById('compare-table').innerHTML=`
+    <table class="compare-table">
+      <thead><tr>
+        <th style="width:40%">${a.name}</th>
+        <th style="text-align:center;width:20%">Stat</th>
+        <th style="text-align:right;width:40%">${b.name}</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><img src="${a.img}" style="width:60px;height:44px;object-fit:cover;object-position:top;border-radius:6px" onerror="this.src='${AVATAR(a.name)}'"></td><td></td><td style="text-align:right"><img src="${b.img}" style="width:60px;height:44px;object-fit:cover;object-position:top;border-radius:6px" onerror="this.src='${AVATAR(b.name)}'"></td></tr>
+        ${rows}${extraRows}
+      </tbody>
+    </table>`;
 }
 
-function renderNewsArticles(articles, elId) {
-  const el = document.getElementById(elId);
-  if (!articles || articles.length === 0) {
-    el.innerHTML = `<div class="news-error"><i class="ti ti-news-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted);"></i>No articles found right now.<br>Check back shortly.</div>`;
-    return;
+// ── NEWS ─────────────────────────────────────────────────────────────────
+function renderNewsArticles(articles,elId){
+  const el=document.getElementById(elId);
+  if(!articles||!articles.length){el.innerHTML='<div class="section-empty"><i class="ti ti-news-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted)"></i>No articles found right now.</div>';return;}
+  el.innerHTML=articles.map(a=>`<a class="news-card" href="${a.link}" target="_blank" rel="noopener">
+    <div class="news-title">${a.title}</div>
+    <div class="news-meta"><span class="news-source">${a.source}</span><span class="news-date">${timeAgo(a.pubDate)}</span></div>
+    ${a.description?`<div class="news-desc">${a.description}</div>`:''}
+  </a>`).join('');
+}
+async function fetchNews(section){
+  if(newsCache[section]){renderNewsArticles(newsCache[section],'news-'+section);return;}
+  document.getElementById('news-'+section).innerHTML='<div class="section-empty">Loading news…</div>';
+  try{
+    const res=await fetch(WORKER_URL+'/news/'+section,{signal:AbortSignal.timeout(12000)});
+    if(!res.ok)throw new Error('Worker '+res.status);
+    const data=await res.json();
+    newsCache[section]=data.articles||[];
+    renderNewsArticles(newsCache[section],'news-'+section);
+  }catch(e){
+    document.getElementById('news-'+section).innerHTML=`<div class="section-empty"><i class="ti ti-wifi-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted)"></i>Couldn't load news.<br><small>${e.message}</small></div>`;
   }
-  el.innerHTML = articles.map(a => `
-    <a class="news-card" href="${a.link}" target="_blank" rel="noopener">
-      <div class="news-title">${a.title}</div>
-      <div class="news-meta">
-        <span class="news-source">${a.source}</span>
-        <span class="news-date">${timeAgo(a.pubDate)}</span>
-      </div>
-      ${a.description ? `<div class="news-desc">${a.description}</div>` : ''}
-    </a>`).join('');
 }
 
-async function fetchNews(section) {
-  if (newsCache[section]) { renderNewsArticles(newsCache[section], 'news-'+section); return; }
-  document.getElementById('news-'+section).innerHTML = `<div class="section-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;color:var(--text-muted);"></i>Loading news…</div>`;
-  try {
-    const res = await fetch(WORKER_URL + '/news/' + section, { signal: AbortSignal.timeout(12000) });
-    if (!res.ok) throw new Error('Worker ' + res.status);
-    const data = await res.json();
-    newsCache[section] = data.articles || [];
-    renderNewsArticles(newsCache[section], 'news-'+section);
-  } catch(err) {
-    document.getElementById('news-'+section).innerHTML = `<div class="news-error"><i class="ti ti-wifi-off" style="font-size:28px;display:block;margin-bottom:8px;color:var(--text-muted);"></i>Couldn't load news.<br><small style="color:var(--text-muted);">${err.message}</small></div>`;
+// ── MORNING MODAL ─────────────────────────────────────────────────────────
+function openMorning(){
+  const modal=document.getElementById('morning-modal');
+  const allG=[...GAMES,...UBT_GAMES,...ROMANIA_GAMES];
+  const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yStr=yesterday.toLocaleDateString('en-CA',{timeZone:RO_TZ});
+  const todayStr=todayRO();
+
+  document.getElementById('morning-date').textContent=
+    new Date().toLocaleDateString('en-GB',{timeZone:RO_TZ,weekday:'long',day:'numeric',month:'long'});
+
+  const yGames=allG.filter(g=>new Date(g.time).toLocaleDateString('en-CA',{timeZone:RO_TZ})===yStr&&g.status==='final');
+  const todayGames=allG.filter(g=>new Date(g.time).toLocaleDateString('en-CA',{timeZone:RO_TZ})===todayStr);
+  const upcoming=allG.filter(g=>g.status==='upcoming').sort((a,b)=>new Date(a.time)-new Date(b.time)).slice(0,3);
+
+  let html='';
+  if(yGames.length){
+    html+='<div class="morning-item"><div class="morning-item-label">Yesterday\'s results</div>';
+    yGames.forEach(g=>{
+      const hW=g.homeScore>g.awayScore;
+      html+=`<div class="morning-item-main">${hW?g.home:g.away} won</div>
+        <div class="morning-item-sub">${g.away} ${g.awayScore}–${g.homeScore} ${g.home} · ${g.round}</div>`;
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="morning-item"><div class="morning-item-label">Yesterday</div><div class="morning-item-sub">No games played.</div></div>';
   }
+  if(todayGames.length){
+    html+='<div class="morning-item"><div class="morning-item-label">Today\'s games</div>';
+    todayGames.forEach(g=>{
+      html+=`<div class="morning-item-main">${g.away||'?'} @ ${g.home}</div>
+        <div class="morning-item-sub">${toRO(g.time)} · ${g.round}</div>`;
+    });
+    html+='</div>';
+  }
+  if(upcoming.length){
+    html+='<div class="morning-item"><div class="morning-item-label">Coming up</div>';
+    upcoming.forEach(g=>{
+      html+=`<div class="morning-item-main">${g.away||'?'} @ ${g.home}</div>
+        <div class="morning-item-sub">${toRO(g.time)} · ${toRODate(g.time)} · ${g.round}</div>`;
+    });
+    html+='</div>';
+  }
+  if(!html)html='<div class="morning-item"><div class="morning-item-sub">Nothing to show yet — check back later.</div></div>';
+  document.getElementById('morning-content').innerHTML=html;
+  modal.classList.add('open');
+}
+function closeMorning(){document.getElementById('morning-modal').classList.remove('open');}
+
+// ── TOAST ────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────────
-function switchTab(tab, btn) {
+// ── SERVICE WORKER ────────────────────────────────────────────────────────
+function registerSW(){
+  if(!('serviceWorker'in navigator))return;
+  const code=`self.addEventListener('message',e=>{if(e.data&&e.data.type==='SCHEDULE_NOTIF'){const{delay,title,body}=e.data;setTimeout(()=>{self.registration.showNotification(title,{body})},delay)}})`;
+  const blob=new Blob([code],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────────
+const ALL_TABS=['schedule','scores','week','bracket','standings','predict','ubt','romania','stars','compare','news'];
+function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  ['schedule','scores','bracket','standings','ubt','romania','stars','news'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display = t===tab?'':'none';
-  });
-  // Lazy-load news when tab is first opened
-  if (tab === 'news') fetchNews(currentNews);
+  ALL_TABS.forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'':'none');
+  if(tab==='news')fetchNews(currentNews);
+  if(tab==='week')renderWeek(selectedWeekDay);
+  if(tab==='compare')initCompare();
+  if(tab==='predict')renderPredictions();
 }
+function filterLeague(l,btn){currentLeague=l;document.querySelectorAll('#tab-schedule .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderSchedule();}
+function filterConf(c,btn){currentConf=c;document.querySelectorAll('#tab-standings .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderStandings();}
+function switchNews(s,btn){currentNews=s;document.querySelectorAll('#tab-news .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['nba','fiba','ubt'].forEach(x=>document.getElementById('news-'+x).style.display=x===s?'':'none');fetchNews(s);}
 
-function filterLeague(l,btn) { currentLeague=l; document.querySelectorAll('#tab-schedule .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderSchedule(); }
-function filterConf(c,btn)   { currentConf=c;   document.querySelectorAll('#tab-standings .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderStandings(); }
-function switchNews(section, btn) {
-  currentNews = section;
-  document.querySelectorAll('#tab-news .filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  ['nba','fiba','ubt'].forEach(s => document.getElementById('news-'+s).style.display = s===section?'':'none');
-  fetchNews(section);
-}
-
-// ── LOAD ──────────────────────────────────────────────────────────────────
-async function loadData() {
+// ── LOAD ─────────────────────────────────────────────────────────────────
+async function loadData(){
   await fetchLiveNBA();
-  renderSchedule(); renderScores(); renderBracket(); renderStandings(); renderUBT(); renderRomania(); renderStars();
-  document.getElementById('last-updated').textContent =
+  renderSchedule();renderScores();renderBracket();renderStandings();
+  renderUBT();renderRomania();renderStars();renderNowBanner();renderPredictions();
+  document.getElementById('last-updated').textContent=
     'Last updated: '+new Date().toLocaleString('en-GB',{timeZone:RO_TZ,hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+' RO time';
-  updateTitle();
+  updateTitle();applyUBTMode();
 }
+async function autoRefresh(){await fetchLiveNBA();renderSchedule();renderScores();renderNowBanner();updateTitle();}
+setInterval(autoRefresh,60000);
+setInterval(()=>{spotlightIdx=(spotlightIdx+1)%STARS_ALL.length;if(document.getElementById('tab-stars').style.display!=='none')renderSpotlight();},8000);
 
-// Auto-refresh NBA scores every 60 seconds
-async function autoRefreshNBA() {
-  await fetchLiveNBA();
-  renderSchedule(); renderScores(); updateTitle();
-}
-setInterval(autoRefreshNBA, 60000);
-
-// Auto-spotlight cycle through all stars
-setInterval(()=>{ spotlightIdx=(spotlightIdx+1)%STARS_ALL.length; if(document.getElementById('tab-stars').style.display!=='none') renderSpotlight(); }, 8000);
-
-registerSW();
-initReminders();
-loadData();
+registerSW();initReminders();loadData();
 </script>
 </body>
 </html>
